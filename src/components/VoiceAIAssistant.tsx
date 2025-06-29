@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Mic, MicOff, Volume2, VolumeX, Phone, PhoneOff, Settings, Waves, AlertCircle, Loader, ChevronLeft } from 'lucide-react';
+import { Mic, MicOff, Volume2, VolumeX, Phone, PhoneOff, Settings, Waves, AlertCircle, Loader, ChevronLeft, CheckCircle } from 'lucide-react';
 import { elevenLabsService } from '../services/elevenlabs';
 import { openaiService } from '../services/openai';
 
@@ -261,19 +261,21 @@ const VoiceAIAssistant: React.FC<VoiceAIAssistantProps> = ({ isOpen, onClose }) 
             </p>
             
             {hasPermission && (
-          {openaiService.isApiConfigured() && (
-            <div className="mt-4 text-center">
-              <span className="inline-flex items-center bg-green-600/20 text-green-300 text-xs px-2 py-1 rounded-full">
-                <CheckCircle className="h-3 w-3 mr-1" />
-                OpenAI API Connected
-              </span>
-            </div>
-          )}
-          
-              <div className="mt-2 flex justify-center items-center space-x-2">
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                <span className="text-green-400 text-sm">Microphone ready</span>
-              </div>
+              <>
+                {openaiService.isApiConfigured() && (
+                  <div className="mt-4 text-center">
+                    <span className="inline-flex items-center bg-green-600/20 text-green-300 text-xs px-2 py-1 rounded-full">
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      OpenAI API Connected
+                    </span>
+                  </div>
+                )}
+                
+                <div className="mt-2 flex justify-center items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  <span className="text-green-400 text-sm">Microphone ready</span>
+                </div>
+              </>
             )}
           </div>
 
