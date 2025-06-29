@@ -11,7 +11,7 @@ export class OpenAIService {
 
   constructor() {
     const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-    this.isConfigured = !!apiKey;
+    this.isConfigured = !!apiKey && !this.isPlaceholderKey(apiKey);
     
     if (this.isConfigured) {
       this.openai = new OpenAI({
@@ -21,6 +21,21 @@ export class OpenAIService {
     } else {
       console.warn('OpenAI API key not configured. AI Assistant will use demo responses.');
     }
+  }
+
+  private isPlaceholderKey(apiKey: string): boolean {
+    // Check for common placeholder patterns
+    const placeholderPatterns = [
+      'your_openai_api_key',
+      'your_api_key_here',
+      'sk-placeholder',
+      'sk-your',
+      'sk-demo'
+    ];
+    
+    return placeholderPatterns.some(pattern => 
+      apiKey.toLowerCase().includes(pattern.toLowerCase())
+    ) || apiKey.length < 20; // OpenAI keys are typically much longer
   }
 
   async generateResponse(messages: AIMessage[]): Promise<string> {
