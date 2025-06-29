@@ -1,60 +1,53 @@
 import React, { useState, useEffect } from 'react';
 import { RefreshCw, CheckCircle, AlertTriangle, XCircle, ExternalLink, Database, Wifi, Globe, Shield, Server, Key, Loader, Cloud } from 'lucide-react';
-import { runConnectionDiagnostic, DiagnosticReport, DiagnosticResult } from '../utils/connectionDiagnostic';
+import { runConnectionDiagnostic } from '../utils/connectionDiagnostic';
 import { supabaseService, isUsingDemoMode } from '../services/supabase';
-import { getDeploymentStatus } from '../utils/deploymentStatus';
 
-const ConnectionTroubleshooter = () => {
-  const [isRunning, setIsRunning] = useState(false);
+interface DiagnosticResult {
+  status: 'success' | 'error' | 'warning';
+  message: string;
+  details?: string;
+  suggestion?: string;
+}
+
+interface DiagnosticReport {
+  timestamp: string;
+  connectionStatus: 'connected' | 'disconnected' | 'partial';
+  supabaseUrl: DiagnosticResult;
+  supabaseKey: DiagnosticResult;
+  networkConnectivity: DiagnosticResult;
+  corsConfiguration: DiagnosticResult;
+  apiEndpointAccess: DiagnosticResult;
+  databaseConnection: DiagnosticResult;
+  overallStatus: string;
+  recommendations: string[];
+}
+
+const ConnectionTroubleshooter: React.FC = () => {
   const [report, setReport] = useState<DiagnosticReport | null>(null);
-  const [deployStatus, setDeployStatus] = useState<{
-    status: string;
-    message: string;
-    lastChecked: Date;
-  } | null>(null);
+  const [isRunning, setIsRunning] = useState(false);
   const [showDetails, setShowDetails] = useState<Record<string, boolean>>({});
-  const [isCheckingDeployment, setIsCheckingDeployment] = useState(false);
 
   useEffect(() => {
     runDiagnostic();
   }, []);
 
-  // Separate function to check deployment status
-  const checkDeploymentStatus = async () => {
-    setIsCheckingDeployment(true);
-    try {
-      const status = await getDeploymentStatus();
-      setDeployStatus({
-        status: status.status,
-        message: status.message,
-        lastChecked: new Date()
-      });
-    } catch (error) {
-      console.error("Failed to check deployment status:", error);
-    } finally {
-      setIsCheckingDeployment(false);
-    }
-  };
-
   const runDiagnostic = async () => {
     setIsRunning(true);
     try {
-      const diagnosticReport = await runConnectionDiagnostic(supabaseService);
+      const diagnosticReport = await runConnectionDiagnostic();
       setReport(diagnosticReport);
-
-      // Attempt to get team data from subscription service
-      const subscription = await subscriptionService.getCurrentUserSubscription();
       
-      if (subscription && subscription.tier === 'teams') {
-        // If we have a team subscription, fetch team data
-        const teamData = await subscriptionService.getTeamSubscription(subscription.teamId || '');
-        setTeam(teamData);
-      } else {
-        setTeam(null);
-      }
+      // Initialize detail visibility state
+      const initialDetailsState: Record<string, boolean> = {};
+      Object.keys(diagnosticReport)
+        .filter(key => typeof diagnosticReport[key as keyof DiagnosticReport] === 'object')
+        .forEach(key => {
+          initialDetailsState[key] = false;
+        });
+      setShowDetails(initialDetailsState);
     } catch (error) {
       console.error('Failed to run diagnostic:', error);
-      setTeam(null);
     } finally {
       setIsRunning(false);
     }
@@ -96,20 +89,6 @@ const ConnectionTroubleshooter = () => {
         return <Database className="h-5 w-5 text-pink-400" />;
       default:
         return null;
-    }
-  };
-
-  // Special function for deployment status icon
-  const getDeploymentStatusIcon = (status: string) => {
-    switch (status) {
-      case 'deployed':
-        return <Cloud className="h-5 w-5 text-green-400" />;
-      case 'deploying':
-        return <Loader className="h-5 w-5 text-blue-400 animate-spin" />;
-      case 'failed':
-        return <AlertTriangle className="h-5 w-5 text-red-400" />;
-      default:
-        return <Cloud className="h-5 w-5 text-gray-400" />;
     }
   };
 
@@ -164,21 +143,6 @@ const ConnectionTroubleshooter = () => {
               <li>Supabase credentials are missing or using placeholder values</li>
               <li>The app is falling back to demo mode for demonstration purposes</li>
             </ul>
-
-            {/* Deployment Status - New Section */}
-            {report && report.deploymentStatus && (
-              <div className="mt-4">
-                <div className="flex items-center space-x-2">
-                  {getDeploymentStatusIcon(report.deploymentStatus.status)}
-                  <div className="text-sm text-gray-300">
-                    Deployment Status: <span className={report.deploymentStatus.status === 'deployed' ? 'text-green-400' : report.deploymentStatus.status === 'deploying' ? 'text-blue-400' : 'text-yellow-400'}>
-                      {report.deploymentStatus.status.charAt(0).toUpperCase() + report.deploymentStatus.status.slice(1)}
-                    </span>
-                  </div>
-                </div>
-                <p className="text-sm text-gray-400 mt-1 ml-7">{report.deploymentStatus.message}</p>
-              </div>
-            )}
           </div>
         </div>
 

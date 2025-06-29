@@ -18,8 +18,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onTabChange, onAIToggle = () => {
   const nextLevel = currentUser.level + 1;
   const xpToNextLevel = 1000 - currentUser.xp;
 
-  // Always treat as a full user in demo mode, not as trial user
-  const isTrialUser = false;
+  // Check if user is a trial user
+  const isTrialUser = currentUser.name.includes('Trial User') || currentUser.email === 'trial@skillarena.com';
   
   // Get clean user name (remove trial suffix if present)
   const getDisplayName = (name: string) => {
