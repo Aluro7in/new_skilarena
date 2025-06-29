@@ -229,7 +229,7 @@ export default function App() {
       case 'connection-troubleshooter':
         return <ConnectionTroubleshooter />;
       case 'profile':
-        return <Profile user={user} onLogout={handleLogout} />;
+        return <Profile user={user || { name: 'Demo User', email: 'demo@example.com' }} onLogout={handleLogout} />;
       case 'student-upgrade':
         return <StudentUpgrade />;
       default:
@@ -251,6 +251,22 @@ export default function App() {
 
   if (!user) {
     return <AuthPage onLogin={handleLogin} />;
+  }
+
+  if (error) {
+    return <ErrorFallback />;
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-white text-lg">Loading SkillArena...</p>
+          <p className="text-gray-400 text-sm mt-2">Press F1 for demo mode</p>
+        </div>
+      </div>
+    );
   }
 
   if (isSuccessPage) {
@@ -279,7 +295,7 @@ export default function App() {
           showTroubleshooter={() => setShowTroubleshooter(true)}
           activeTab={activeTab} 
           onTabChange={handleTabChange} 
-          user={user || { name: 'Demo User', email: 'demo@example.com' }}
+          user={user} 
           onAIToggle={() => setIsAIOpen(!isAIOpen)}
         />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

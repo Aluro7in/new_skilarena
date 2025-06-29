@@ -3,17 +3,17 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Use default values for demo mode if environment variables are missing
-const DEMO_SUPABASE_URL = 'https://demo.supabase.co';
-const DEMO_SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0';
-
 // Is the app using demo mode?
 export const isUsingDemoMode = !supabaseUrl || !supabaseAnonKey || 
-                              supabaseUrl.includes('your_supabase') || 
-                              supabaseAnonKey.includes('your_supabase');
+                             supabaseUrl.includes('your_') || 
+                             supabaseAnonKey.includes('your_') ||
+                             !supabaseUrl.startsWith('https://') ||
+                             supabaseAnonKey.length < 10;
+                             
+// Use actual credentials if available, otherwise use defaults for demo mode
 export const supabase = createClient(
-  supabaseUrl || DEMO_SUPABASE_URL, 
-  supabaseAnonKey || DEMO_SUPABASE_KEY
+  supabaseUrl || 'https://demo.supabase.co', 
+  supabaseAnonKey || 'demo-anon-key'
 );
 
 export interface SupabaseUser {
@@ -91,6 +91,7 @@ export class SupabaseService {
   async getCurrentUser(): Promise<SupabaseUser | null> {
     try {
       if (isUsingDemoMode) {
+        console.info('Using demo user in demo mode');
         // Return a mock user in demo mode
         return {
           id: 'demo-user-id',
@@ -146,13 +147,31 @@ export class SupabaseService {
       return session;
     } catch (error: any) {
       // Check if this is a session-related error (expected for unauthenticated users)
-      if (this.isSessionError(error.message)) {
+      const isSessionErr = this.isSessionError(error.message);
+      if (isSessionErr) {
         console.debug('No active session found');
       } else {
         console.error('Get session error:', error);
       }
+      
+      // Return a demo user when in demo mode, regardless of error
+      if (isUsingDemoMode) {
+        return this.getDemoUser();
+      }
+      
       return null;
     }
+  }
+  
+  private getDemoUser(): SupabaseUser {
+    return {
+      id: 'demo-user-id',
+      email: 'demo@example.com',
+      user_metadata: { 
+        full_name: 'Demo User',
+        avatar_url: 'https://images.pexels.com/photos/1722198/pexels-photo-1722198.jpeg?auto=compress&cs=tinysrgb&w=150'
+      }
+    };
   }
 
   async getUserSubscription(): Promise<UserSubscription | null> {

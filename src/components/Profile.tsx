@@ -3,13 +3,19 @@ import { User, Edit, Trophy, Star, Calendar, Flame, Target, BookOpen, Award, Set
 import { currentUser, skills } from '../data/mockData';
 
 interface ProfileProps {
-  user: { name: string; email: string };
+  user: { name: string; email: string } | null;
   onLogout: () => void;
 }
 
 const Profile: React.FC<ProfileProps> = ({ user, onLogout }) => {
+  // Ensure we have a fallback for user properties when null
+  const userName = user?.name || 'Guest User';
+  const userEmail = user?.email || 'guest@example.com';
+  
   const [activeTab, setActiveTab] = useState<'overview' | 'achievements' | 'stats' | 'settings'>('overview');
 
+  const displayName = isUsingDemoMode ? userName + ' (Demo)' : userName;
+  
   const completedSkills = skills.filter(skill => skill.completed);
   const totalLessons = skills.reduce((acc, skill) => acc + skill.lessons.length, 0);
   const completedLessons = skills.reduce((acc, skill) => 
@@ -50,7 +56,7 @@ const Profile: React.FC<ProfileProps> = ({ user, onLogout }) => {
           <div className="relative">
             <img
               src={currentUser.avatar}
-              alt={user.name}
+              alt={userName}
               className="w-24 h-24 rounded-full border-4 border-white/20"
             />
             <div className="absolute -bottom-2 -right-2 bg-yellow-500 text-white text-sm font-bold px-2 py-1 rounded-full">
@@ -59,9 +65,9 @@ const Profile: React.FC<ProfileProps> = ({ user, onLogout }) => {
           </div>
           
           <div className="flex-1">
-            <h2 className="text-2xl font-bold">{user.name}</h2>
-            <p className="text-purple-100 mb-2">Level {currentUser.level} Learner</p>
-            <p className="text-purple-200 text-sm mb-2">{user.email}</p>
+            <h2 className="text-2xl font-bold">{displayName}</h2>
+            <p className="text-purple-100 mb-2">{isUsingDemoMode ? 'Demo Mode' : `Level ${currentUser.level} Learner`}</p>
+            <p className="text-purple-200 text-sm mb-2">{userEmail}</p>
             
             <div className="flex items-center space-x-4 text-sm">
               <div className="flex items-center space-x-1">
@@ -239,7 +245,7 @@ const Profile: React.FC<ProfileProps> = ({ user, onLogout }) => {
               <label className="block text-sm font-medium text-gray-400 mb-2">Display Name</label>
               <input
                 type="text"
-                value={user.name}
+                value={userName}
                 className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-purple-500"
                 readOnly
               />
@@ -249,7 +255,7 @@ const Profile: React.FC<ProfileProps> = ({ user, onLogout }) => {
               <label className="block text-sm font-medium text-gray-400 mb-2">Email</label>
               <input
                 type="email"
-                value={user.email}
+                value={userEmail}
                 className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-purple-500"
                 readOnly
               />
