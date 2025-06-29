@@ -182,6 +182,10 @@ export default function App() {
     }
   };
 
+  const checkConnectionStatus = () => {
+    setShowTroubleshooter(true);
+  };
+
   const renderContent = () => {
     if (isSuccessPage) {
       return (
@@ -284,11 +288,12 @@ export default function App() {
       
       <div className="relative z-10">
         <Navigation 
-          showTroubleshooter={() => setShowTroubleshooter(true)}
+          showTroubleshooter={checkConnectionStatus}
           activeTab={activeTab} 
           onTabChange={handleTabChange} 
           user={user}
-          onAIToggle={() => setIsAIOpen(!isAIOpen)}
+          onAIToggle={() => setIsAIOpen(!isAIOpen)} 
+          hasConnectionIssues={connectionStatus === 'error' || !navigator.onLine}
         />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {showTroubleshooter ? (
