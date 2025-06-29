@@ -3,9 +3,7 @@ import { supabase } from './supabase';
 import { stripeProducts, type StripeProduct } from '../stripe-config';
 
 const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
-const isStripeConfigured = !!stripePublishableKey && 
-                          !stripePublishableKey.includes('your_') && 
-                          !stripePublishableKey.includes('pk_test_placeholder');
+const isStripeConfigured = false; // Force demo mode for payments
 
 // Only attempt to load Stripe if we have a valid key
 const stripePromise = isStripeConfigured 
@@ -103,13 +101,9 @@ export class StripeService {
   async purchaseProduct(priceId: string, mode: 'subscription' | 'payment' = 'subscription') {
     try {
       // Check if Stripe is properly configured
-      if (!this.isConfigured) {
-        console.warn('Stripe is not configured. Running in demo mode.');
-        return;
-      }
-      
-      const session = await this.createCheckoutSession(priceId, mode);
-      await this.redirectToCheckout(session.sessionId);
+      console.warn('Stripe is not configured. Running in demo mode.');
+      alert('This is a demo version. In a real application, this would redirect to Stripe for payment processing.');
+      return;
     } catch (error) {
       console.error('Error purchasing product:', error);
       throw error;
