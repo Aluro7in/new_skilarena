@@ -258,7 +258,7 @@ export default function App() {
   }
 
   if (!user) {
-    return <AuthPage onLogin={handleLogin} />;
+    return <AuthPage onLogin={handleLogin} onShowTroubleshooter={() => setShowTroubleshooter(true)} />;
   }
 
   if (error) {
