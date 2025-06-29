@@ -1,33 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { RefreshCw, CheckCircle, AlertTriangle, XCircle, ExternalLink, Database, Wifi, Globe, Shield, Server, Key, Loader, Cloud } from 'lucide-react';
-import { runConnectionDiagnostic } from '../utils/connectionDiagnostic';
+import { runConnectionDiagnostic, DiagnosticReport, DiagnosticResult } from '../utils/connectionDiagnostic';
 import { supabaseService, isUsingDemoMode } from '../services/supabase';
 import { getDeploymentStatus } from '../utils/deploymentStatus';
-
-interface DiagnosticResult {
-  status: 'success' | 'error' | 'warning';
-  message: string;
-  details?: string;
-  suggestion?: string;
-}
-
-interface DiagnosticReport {
-  timestamp: string;
-  connectionStatus: 'connected' | 'disconnected' | 'partial';
-  supabaseUrl: DiagnosticResult;
-  supabaseKey: DiagnosticResult;
-  networkConnectivity: DiagnosticResult;
-  corsConfiguration: DiagnosticResult;
-  apiEndpointAccess: DiagnosticResult;
-  databaseConnection: DiagnosticResult;
-  overallStatus: string;
-  recommendations: string[];
-  deploymentStatus?: {
-    status: string;
-    message: string;
-    lastChecked: string;
-  };
-}
 
 const ConnectionTroubleshooter = () => {
   const [isRunning, setIsRunning] = useState(false);
