@@ -23,6 +23,18 @@ interface DiagnosticReport {
   recommendations: string[];
 }
 
+const ConnectionTroubleshooter = () => {
+  const [isRunning, setIsRunning] = useState(false);
+  const [report, setReport] = useState<DiagnosticReport | null>(null);
+  const [showDetails, setShowDetails] = useState<Record<string, boolean>>({});
+  const [team, setTeam] = useState(null);
+
+  const runDiagnostic = async () => {
+    setIsRunning(true);
+    try {
+      const diagnosticReport = await runConnectionDiagnostic(supabaseService);
+      setReport(diagnosticReport);
+
       // Attempt to get team data from subscription service
       const subscription = await subscriptionService.getCurrentUserSubscription();
       
