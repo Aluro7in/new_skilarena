@@ -1,5 +1,6 @@
 import React from 'react';
 import { Home, BookOpen, Trophy, Sword, User, Star, GraduationCap, TestTube, Briefcase, Zap, Bot, LogOut, ShoppingCart, Calendar, Users, Globe, Award, Settings, Crown, AlertTriangle } from 'lucide-react';
+import { isUsingDemoMode } from '../services/supabase';
 
 interface NavigationProps {
   activeTab: string;
