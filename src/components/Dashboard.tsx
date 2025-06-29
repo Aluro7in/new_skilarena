@@ -1,6 +1,7 @@
 import React from 'react';
 import { Trophy, Flame, Target, TrendingUp, Star, Zap, GraduationCap, TestTube, Gamepad2, Play, ArrowRight, Crown, Sparkles, Video, Mic, Globe, CheckCircle, ExternalLink } from 'lucide-react';
 import { currentUser, skills, challenges, tutorials, gameTests } from '../data/mockData';
+import { openaiService } from '../services/openai';
 
 interface DashboardProps {
   onTabChange: (tab: string) => void;
