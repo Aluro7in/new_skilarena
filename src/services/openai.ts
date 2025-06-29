@@ -11,14 +11,15 @@ export class OpenAIService {
 
   constructor() {
     const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-    this.isConfigured = !!apiKey && !this.isPlaceholderKey(apiKey) && apiKey.length > 20;
+    this.isConfigured = !!apiKey && !this.isPlaceholderKey(apiKey);
 
     if (this.isConfigured) {
       try {
         this.openai = new OpenAI({
           apiKey: apiKey,
-          dangerouslyAllowBrowser: true // Note: In production, API calls should go through your backend
+          dangerouslyAllowBrowser: true
         });
+        console.log("OpenAI service initialized successfully");
       } catch (error) {
         console.error('Failed to initialize OpenAI:', error);
         this.isConfigured = false;
@@ -32,17 +33,16 @@ export class OpenAIService {
     // Check for common placeholder patterns
     const placeholderPatterns = [
       'your_openai_api_key',
-      'your_openai_api_key',
       'your_api_key_here',
       'sk-placeholder',
       'sk-your',
       'sk-demo',
-      'sk-proj'
+      'openai-api-key-placeholder'
     ];
     
     return placeholderPatterns.some(pattern => 
       apiKey.toLowerCase().includes(pattern.toLowerCase())
-    ) || apiKey.length < 20; // OpenAI keys are typically much longer
+    );
   }
 
   async generateResponse(messages: AIMessage[]): Promise<string> {
@@ -51,7 +51,8 @@ export class OpenAIService {
     }
 
     try {
-      const systemMessage: AIMessage = {
+      // System message with instructions for the AI assistant
+      const systemMessage = {
         role: 'system',
         content: `You are an AI learning assistant for SkillArena, a gamified learning platform focused on game development, programming, and technical skills. You help users with:
 
@@ -70,7 +71,7 @@ Be helpful, encouraging, and provide practical advice. Keep responses concise bu
       const response = await this.openai.chat.completions.create({
         model: 'gpt-3.5-turbo',
         messages: [systemMessage, ...messages],
-        max_tokens: 500,
+        max_tokens: 800,
         temperature: 0.7,
         stream: false,
       });
