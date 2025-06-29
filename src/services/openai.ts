@@ -11,13 +11,18 @@ export class OpenAIService {
 
   constructor() {
     const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-    this.isConfigured = !!apiKey && !this.isPlaceholderKey(apiKey);
+    this.isConfigured = !!apiKey && !this.isPlaceholderKey(apiKey) && apiKey.length > 20;
     
     if (this.isConfigured) {
-      this.openai = new OpenAI({
-        apiKey: apiKey,
-        dangerouslyAllowBrowser: true // Note: In production, API calls should go through your backend
-      });
+      try {
+        this.openai = new OpenAI({
+          apiKey: apiKey,
+          dangerouslyAllowBrowser: true // Note: In production, API calls should go through your backend
+        });
+      } catch (error) {
+        console.error('Failed to initialize OpenAI:', error);
+        this.isConfigured = false;
+      }
     } else {
       console.warn('OpenAI API key not configured. AI Assistant will use demo responses.');
     }
@@ -27,10 +32,12 @@ export class OpenAIService {
     // Check for common placeholder patterns
     const placeholderPatterns = [
       'your_openai_api_key',
+      'your_openai_api_key',
       'your_api_key_here',
       'sk-placeholder',
       'sk-your',
-      'sk-demo'
+      'sk-demo',
+      'sk-proj'
     ];
     
     return placeholderPatterns.some(pattern => 

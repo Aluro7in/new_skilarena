@@ -25,7 +25,10 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   private handleRetry = () => {
+    // Clear error and force re-render
     this.setState({ hasError: false, error: null });
+    // Also reload main resources to ensure clean state
+    window.location.href = '/';
   };
 
   private handleReload = () => {
@@ -49,8 +52,11 @@ class ErrorBoundary extends Component<Props, State> {
             
             {this.state.error && (
               <div className="bg-red-600/10 border border-red-500/20 rounded-xl p-4 mb-6 text-left">
-                <p className="text-red-300 text-sm font-mono">
-                  {this.state.error.message}
+                <p className="text-red-300 text-sm font-mono whitespace-pre-wrap">
+                  {this.state.error.name}: {this.state.error.message}
+                </p>
+                <p className="text-gray-400 text-xs mt-2">
+                  This error has been logged. If the problem persists, please try refreshing the page or contact support.
                 </p>
               </div>
             )}

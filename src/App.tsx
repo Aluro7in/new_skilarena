@@ -22,6 +22,26 @@ import SubscriptionGate from './components/SubscriptionGate';
 import { supabaseService, type SupabaseUser } from './services/supabase';
 import { subscriptionService } from './services/subscriptionService';
 
+// Add error boundary fallback for the entire app
+const ErrorFallback = () => (
+  <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
+    <div className="bg-black/20 backdrop-blur-xl border border-white/10 rounded-3xl p-8 max-w-md text-center">
+      <div className="w-16 h-16 mx-auto mb-6 text-red-400 flex items-center justify-center bg-red-400/10 rounded-full">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+      </div>
+      <h2 className="text-2xl font-bold text-white mb-3">Something went wrong</h2>
+      <p className="text-gray-300 mb-6">We're having trouble loading the application.</p>
+      <button 
+        onClick={() => window.location.reload()} 
+        className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl transition-colors">
+        Reload Application
+      </button>
+    </div>
+  </div>
+);
+
 interface User {
   name: string;
   email: string;
@@ -37,6 +57,7 @@ export default function App() {
   const [isAIOpen, setIsAIOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isDemoMode, setIsDemoMode] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
   // Check for success page parameters
   const urlParams = new URLSearchParams(window.location.search);
@@ -63,10 +84,17 @@ export default function App() {
   useEffect(() => {
     // Check for existing session
     const checkUser = async () => {
+      setError(null);
       try {
         const currentUser = await supabaseService.getCurrentUser();
         if (currentUser) {
-          const subscription = await subscriptionService.getCurrentUserSubscription();
+          let subscription;
+          try {
+            subscription = await subscriptionService.getCurrentUserSubscription();
+          } catch (subscriptionError) {
+            console.warn('Unable to fetch subscription, using default', subscriptionError);
+          }
+          
           setUser({
             name: currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || 'User',
             email: currentUser.email || '',
@@ -80,6 +108,7 @@ export default function App() {
         }
       } catch (error) {
         console.error('Error checking user session:', error);
+        setError(error instanceof Error ? error : new Error('Unknown error during authentication'));
       } finally {
         setIsLoading(false);
       }
@@ -126,7 +155,12 @@ export default function App() {
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
     // Smooth scroll to top when changing tabs
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    try {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (e) {
+      // Fallback for browsers that don't support smooth scrolling
+      window.scrollTo(0, 0);
+    }
   };
 
   const renderContent = () => {
@@ -208,6 +242,10 @@ export default function App() {
 
   if (isSuccessPage) {
     return renderContent();
+  }
+
+  if (error) {
+    return <ErrorFallback />;
   }
 
   return (

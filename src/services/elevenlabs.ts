@@ -32,7 +32,7 @@ export class ElevenLabsService {
 
   constructor() {
     const apiKey = import.meta.env.VITE_ELEVENLABS_API_KEY;
-    this.isConfigured = !!apiKey;
+    this.isConfigured = !!apiKey && apiKey !== 'your_elevenlabs_api_key' && !apiKey.includes('sk_');
     
     this.config = {
       apiKey: apiKey || '',
@@ -112,11 +112,17 @@ export class ElevenLabsService {
       
       // Use a pleasant voice if available
       const voices = this.synthesis.getVoices();
-      const preferredVoice = voices.find(voice => 
-        voice.name.includes('Google') || 
-        voice.name.includes('Microsoft') ||
-        voice.lang === 'en-US'
-      );
+      
+      let preferredVoice;
+      try {
+        preferredVoice = voices.find(voice => 
+          voice.name.includes('Google') || 
+          voice.name.includes('Microsoft') ||
+          voice.lang === 'en-US'
+        );
+      } catch (e) {
+        console.warn('Error finding preferred voice:', e);
+      }
       
       if (preferredVoice) {
         utterance.voice = preferredVoice;
@@ -206,7 +212,7 @@ export class ElevenLabsService {
   }
 
   isSpeechRecognitionAvailable(): boolean {
-    return !!this.recognition;
+    return !!this.recognition || !!(window.SpeechRecognition || window.webkitSpeechRecognition);
   }
 
   isApiConfigured(): boolean {

@@ -34,10 +34,11 @@ interface TavusReplica {
 export class TavusService {
   private config: TavusConfig;
   private isConfigured: boolean;
+  private lastError: Error | null = null;
 
   constructor() {
     const apiKey = import.meta.env.VITE_TAVUS_API_KEY;
-    this.isConfigured = !!apiKey;
+    this.isConfigured = !!apiKey && apiKey !== 'your_tavus_api_key' && !apiKey.includes('api_key');
     
     this.config = {
       apiKey: apiKey || '',
@@ -51,7 +52,11 @@ export class TavusService {
 
   async createConversation(replicaId: string, options?: Partial<TavusConversationRequest>): Promise<TavusConversationResponse> {
     if (!this.isConfigured) {
-      throw new Error('Tavus API not configured');
+      console.warn('Tavus API not configured, returning demo URL');
+      return {
+        conversation_id: 'demo-id',
+        conversation_url: this.getDemoConversationUrl()
+      };
     }
 
     try {
@@ -163,7 +168,7 @@ export class TavusService {
   }
 
   getDemoConversationUrl(): string {
-    return 'https://meet.tavusapi.com/demo-conversation';
+    return 'demo-mode';
   }
 }
 

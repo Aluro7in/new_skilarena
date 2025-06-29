@@ -352,7 +352,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onTabChange, onAIToggle = () => {
               </div>
             </div>
             <a 
-              href="https://eclectic-pika-b64cd3.netlify.app"
+              href={window.location.origin}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full mt-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-2 px-4 rounded-lg font-semibold hover:from-blue-700 hover:to-cyan-700 transition-all transform hover:scale-105 flex items-center justify-center space-x-2"
