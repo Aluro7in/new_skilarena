@@ -7,14 +7,14 @@
 
 [[redirects]]
   from = "/*"
-  to = "https://qzeodctbfxtnexaguggg.supabase.co/functions/v1/:splat"
+  to = "/index.html"
   status = 200
+  force = false
 
 [[headers]]
   for = "/*"
   [headers.values]
     X-Frame-Options = "DENY"
-  to = "https://qzeodctbfxtnexaguggg.supabase.co/functions/v1/stripe-webhook"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
@@ -39,3 +39,31 @@
   for = "/index.html"
   [headers.values]
     Permissions-Policy = "camera=(self), microphone=(self), geolocation=()"
+
+# Specific redirect for Stripe webhook requests
+[[redirects]]
+  from = "/api/stripe-webhook"
+  to = "https://qzeodctbfxtnexaguggg.supabase.co/functions/v1/stripe-webhook"
+  status = 200
+  force = true
+
+# Redirect for Stripe checkout
+[[redirects]]
+  from = "/api/stripe-checkout"
+  to = "https://qzeodctbfxtnexaguggg.supabase.co/functions/v1/stripe-checkout" 
+  status = 200
+  force = true
+
+# Redirect for Stripe create checkout
+[[redirects]]
+  from = "/api/stripe-create-checkout"
+  to = "https://qzeodctbfxtnexaguggg.supabase.co/functions/v1/stripe-create-checkout"
+  status = 200
+  force = true
+
+# Redirect for Stripe portal
+[[redirects]]
+  from = "/api/stripe-create-portal"
+  to = "https://qzeodctbfxtnexaguggg.supabase.co/functions/v1/stripe-create-portal"
+  status = 200
+  force = true

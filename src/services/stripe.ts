@@ -50,10 +50,12 @@ export class StripeService {
       }
 
       const baseUrl = window.location.origin;
+      // Use the redirected URL path instead of direct Supabase function URL
+      const checkoutEndpoint = `${baseUrl}/api/stripe-checkout`;
       const successUrl = `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}&plan_id=${product.id}`;
       const cancelUrl = `${baseUrl}/student-upgrade`;
 
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/stripe-checkout`, {
+      const response = await fetch(checkoutEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
