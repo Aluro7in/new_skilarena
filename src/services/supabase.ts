@@ -3,10 +3,39 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+// Helper function to validate Supabase URL format
+const isValidSupabaseUrl = (url: string): boolean => {
+  if (!url) return false;
+  try {
+    const urlObj = new URL(url);
+    return urlObj.hostname.includes('supabase') && 
+           !url.includes('your_supabase') && 
+           !url.includes('localhost') &&
+           !url.includes('demo');
+  } catch {
+    return false;
+  }
+};
+
+// Helper function to validate Supabase anon key format
+const isValidSupabaseAnonKey = (key: string): boolean => {
+  if (!key) return false;
+  // Check for obvious invalid formats
+  if (key.includes('your_supabase') || 
+      key.startsWith('sk_') || // Secret key format
+      key.length < 100 || // Anon keys are typically much longer
+      key === 'your_anon_key' ||
+      key.includes('demo')) {
+    return false;
+  }
+  // Basic JWT format check (should have 3 parts separated by dots)
+  const parts = key.split('.');
+  return parts.length === 3 && parts.every(part => part.length > 0);
+};
+
 // Check if the app should use demo mode
-export const isUsingDemoMode = !supabaseUrl || !supabaseAnonKey || 
-                             supabaseUrl.includes('your_supabase') || 
-                             supabaseAnonKey.includes('your_supabase') ||
+export const isUsingDemoMode = !isValidSupabaseUrl(supabaseUrl) || 
+                             !isValidSupabaseAnonKey(supabaseAnonKey) ||
                              import.meta.env.VITE_FORCE_DEMO_MODE === 'true';
                              
 // Create Supabase client with actual credentials
