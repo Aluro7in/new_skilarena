@@ -13,7 +13,10 @@ export class OpenAIService {
     const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
     this.isConfigured = !!apiKey && !this.isPlaceholderKey(apiKey) && apiKey.length > 20;
     
-    if (this.isConfigured) {
+    // Always set to false to force demo mode
+    this.isConfigured = false;
+    
+    if (false) { // Never initialize the actual API client
       try {
         this.openai = new OpenAI({
           apiKey: apiKey,

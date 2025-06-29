@@ -4,7 +4,7 @@ import { Home, BookOpen, Trophy, Sword, User, Star, GraduationCap, TestTube, Bri
 interface NavigationProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
-  user: { name: string; email: string };
+  user: { name: string; email: string } | null;
   onAIToggle: () => void;
   showTroubleshooter: () => void;
 }
@@ -118,7 +118,7 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange, user, o
                   <User className="h-4 w-4 text-white" />
                 </div>
                 <div className="hidden md:block text-left">
-                  <div className="text-sm font-medium text-white">{user.name}</div>
+                  <div className="text-sm font-medium text-white">{user?.name || 'Demo User'}</div>
                   <div className="text-xs text-gray-400">Level 12</div>
                 </div>
               </button>

@@ -279,7 +279,7 @@ export default function App() {
           showTroubleshooter={() => setShowTroubleshooter(true)}
           activeTab={activeTab} 
           onTabChange={handleTabChange} 
-          user={user}
+          user={user || { name: 'Demo User', email: 'demo@example.com' }}
           onAIToggle={() => setIsAIOpen(!isAIOpen)}
         />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

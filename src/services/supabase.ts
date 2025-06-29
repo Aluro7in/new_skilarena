@@ -5,12 +5,10 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Use default values for demo mode if environment variables are missing
 const DEMO_SUPABASE_URL = 'https://demo.supabase.co';
-const DEMO_SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0';
+const DEMO_SUPABASE_KEY = 'demo-mode-key';
 
 // Is the app using demo mode?
-export const isUsingDemoMode = !supabaseUrl || !supabaseAnonKey || 
-                              supabaseUrl.includes('your_supabase') || 
-                              supabaseAnonKey.includes('your_supabase');
+export const isUsingDemoMode = true; // Force demo mode
 export const supabase = createClient(
   supabaseUrl || DEMO_SUPABASE_URL, 
   supabaseAnonKey || DEMO_SUPABASE_KEY
@@ -41,7 +39,7 @@ export interface UserSubscription {
 export class SupabaseService {
   async signUp(email: string, password: string, fullName?: string) {
     try {
-      if (isUsingDemoMode) {
+      // Always return mock data since we're in demo mode
         // Return mock data in demo mode to prevent actual API calls
         return {
           user: {
@@ -51,24 +49,6 @@ export class SupabaseService {
             email_confirmed_at: new Date().toISOString()
           }
         };
-      }
-
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: fullName,
-          },
-        },
-      });
-
-      if (error) {
-        console.error('Signup error:', error);
-        throw new Error(this.getReadableErrorMessage(error.message));
-      }
-      
-      return data;
     } catch (error: any) {
       console.error('Signup error:', error);
       throw error;
@@ -77,7 +57,7 @@ export class SupabaseService {
 
   async signIn(email: string, password: string) {
     try {
-      if (isUsingDemoMode) {
+      // Always return mock data since we're in demo mode
         // Return mock data in demo mode to prevent actual API calls
         return {
           user: {
@@ -87,19 +67,6 @@ export class SupabaseService {
             email_confirmed_at: new Date().toISOString()
           }
         };
-      }
-
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        console.error('Signin error:', error);
-        throw new Error(this.getReadableErrorMessage(error.message));
-      }
-
-      return data;
     } catch (error: any) {
       console.error('Signin error:', error);
       throw error;
@@ -121,25 +88,26 @@ export class SupabaseService {
 
   async getCurrentUser(): Promise<SupabaseUser | null> {
     try {
-      const { data: { user }, error } = await supabase.auth.getUser();
-      if (error) {
-        // Check if this is a session-related error (expected for unauthenticated users)
-        if (this.isSessionError(error.message)) {
-          console.debug('No authenticated user session found');
-        } else {
-          console.error('Get user error:', error);
+      // Return a mock user in demo mode
+      return {
+        id: 'demo-user-id',
+        email: 'demo@example.com',
+        user_metadata: { 
+          full_name: 'Demo User',
+          avatar_url: 'https://images.pexels.com/photos/1722198/pexels-photo-1722198.jpeg?auto=compress&cs=tinysrgb&w=150'
         }
-        return null;
-      }
-      return user as SupabaseUser | null;
+      };
     } catch (error: any) {
-      // Check if this is a session-related error (expected for unauthenticated users)
-      if (this.isSessionError(error.message)) {
-        console.debug('No authenticated user session found');
-      } else {
-        console.error('Get user error:', error);
-      }
-      return null;
+      console.error('Get user error:', error);
+      // Still return a mock user even if there's an error
+      return {
+        id: 'demo-user-id',
+        email: 'demo@example.com',
+        user_metadata: { 
+          full_name: 'Demo User',
+          avatar_url: 'https://images.pexels.com/photos/1722198/pexels-photo-1722198.jpeg?auto=compress&cs=tinysrgb&w=150'
+        }
+      };
     }
   }
 

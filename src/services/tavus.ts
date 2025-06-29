@@ -38,7 +38,8 @@ export class TavusService {
 
   constructor() {
     const apiKey = import.meta.env.VITE_TAVUS_API_KEY;
-    this.isConfigured = !!apiKey && apiKey !== 'your_tavus_api_key' && !apiKey.includes('api_key');
+    // Force demo mode
+    this.isConfigured = false;
     
     this.config = {
       apiKey: apiKey || '',
