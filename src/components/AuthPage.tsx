@@ -178,7 +178,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
   if (isLoading && !formData.email) {
     return <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
       <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-    </div>
+    </div>;
   }
 
   return (
@@ -197,293 +197,293 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
       <div className="relative z-10 w-full max-w-6xl mx-auto px-4">
         {/* Network Status Indicator */}
         {isOffline && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          {/* Left Side - Branding & Info */}
-              You appear to be offline. Some features may be limited.
-            <div className="flex items-center justify-center lg:justify-start space-x-3 mb-8">
-              <div className="bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-500 p-3 rounded-xl shadow-2xl">
-                <Star className="h-8 w-8 text-white" />
-              </div>
-              <div>
-                <span className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                  SkillArena
-        {(
-                <div className="text-sm text-gray-400">Level Up Your Skills</div>
-              </div>
-            </div>
-
-            <h1 className="text-5xl font-bold text-white mb-6">
-              Transform Your
-              Into a Career
-            </h1>
-
-            <p className="text-xl text-gray-300 mb-8 max-w-lg">
-              Join the world's largest gamified learning platform. Master skills, test games, and connect with top studios worldwide.
-            </p>
-
-            {/* Stats */}
-            <div className="grid grid-cols-2 gap-6 mb-8">
-              {stats.map((stat, index) => {
-                const Icon = stat.icon;
-                return (
-                  <div key={index} className="bg-black/20 backdrop-blur-xl border border-white/10 rounded-2xl p-4 text-center">
-                    <Icon className="h-8 w-8 text-purple-400 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-white">{stat.value}</div>
-                    <div className="text-sm text-gray-400">{stat.label}</div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="hidden lg:block">
-              <div className="bg-gradient-to-r from-purple-600/20 to-blue-600/20 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-                <h3 className="text-lg font-bold text-white mb-3">What you'll get:</h3>
-                <ul className="space-y-2 text-gray-300">
-                  <li className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                    <span>Access to 500+ premium skills and tutorials</span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                    <span>Digital marketplace for game assets</span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-cyan-400 rounded-full"></div>
-                    <span>Verifiable certificates and credentials</span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                    <span>Earn money through game testing</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Side - Auth Form or Network Error */}
-          <div className="flex justify-center">
-            <div className="w-full max-w-md">
-              <div className="bg-black/20 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl">
-                <div className="text-center mb-8">
-                  <h2 className="text-3xl font-bold text-white mb-2">
-                    {isLogin ? 'Welcome Back!' : 'Join SkillArena'}
-                  </h2>
-                  <p className="text-gray-400">
-                    {isLogin ? 'Sign in to continue your journey' : 'Start your learning adventure today'}
-                  </p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Left Side - Branding & Info */}
+            <div>
+              <div className="flex items-center justify-center lg:justify-start space-x-3 mb-8">
+                <div className="bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-500 p-3 rounded-xl shadow-2xl">
+                  <Star className="h-8 w-8 text-white" />
                 </div>
+                <div>
+                  <span className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                    SkillArena
+                  </span>
+                  <div className="text-sm text-gray-400">Level Up Your Skills</div>
+                </div>
+              </div>
 
-                {/* Error/Success Messages */}
-                {error && (
-                  <div className="mb-6 bg-red-600/20 border border-red-500/30 rounded-xl p-4">
-                    <div className="flex items-start space-x-2">
-                      <AlertCircle className="h-5 w-5 text-red-400 flex-shrink-0" />
-                      <p className="text-red-300 text-sm">{error}</p>
+              <h1 className="text-5xl font-bold text-white mb-6">
+                Transform Your Passion Into a Career
+              </h1>
+
+              <p className="text-xl text-gray-300 mb-8 max-w-lg">
+                Join the world's largest gamified learning platform. Master skills, test games, and connect with top studios worldwide.
+              </p>
+
+              {/* Stats */}
+              <div className="grid grid-cols-2 gap-6 mb-8">
+                {stats.map((stat, index) => {
+                  const Icon = stat.icon;
+                  return (
+                    <div key={index} className="bg-black/20 backdrop-blur-xl border border-white/10 rounded-2xl p-4 text-center">
+                      <Icon className="h-8 w-8 text-purple-400 mx-auto mb-2" />
+                      <div className="text-2xl font-bold text-white">{stat.value}</div>
+                      <div className="text-sm text-gray-400">{stat.label}</div>
                     </div>
-                  </div>
-                )}
+                  );
+                })}
+              </div>
 
-                {message && (
-                  <div className="mb-6 bg-green-600/20 border border-green-500/30 rounded-xl p-4">
-                    <p className="text-green-300 text-sm">{message}</p>
-                  </div>
-                )}
+              <div className="hidden lg:block">
+                <div className="bg-gradient-to-r from-purple-600/20 to-blue-600/20 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
+                  <h3 className="text-lg font-bold text-white mb-3">What you'll get:</h3>
+                  <ul className="space-y-2 text-gray-300">
+                    <li className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                      <span>Access to 500+ premium skills and tutorials</span>
+                    </li>
+                    <li className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                      <span>Digital marketplace for game assets</span>
+                    </li>
+                    <li className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-cyan-400 rounded-full"></div>
+                      <span>Verifiable certificates and credentials</span>
+                    </li>
+                    <li className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <span>Earn money through game testing</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
 
-                {/* Trial Option */}
-                {canUseTrial && (
-                  <div className="mb-6 bg-gradient-to-r from-orange-600/20 to-yellow-600/20 backdrop-blur-sm border border-orange-500/20 rounded-2xl p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-2">
-                        <Timer className="h-5 w-5 text-orange-400" />
-                        <span className="text-orange-300 font-semibold">Try Before You Sign Up</span>
-                      </div>
-                      <span className="text-xs bg-orange-600/30 text-orange-200 px-2 py-1 rounded-full">
-                        {3 - trialAttempts} left
-                      </span>
-                    </div>
-                    <p className="text-orange-200 text-sm mb-3">
-                      Explore SkillArena with limited access. No signup required!
+            {/* Right Side - Auth Form or Network Error */}
+            <div className="flex justify-center">
+              <div className="w-full max-w-md">
+                <div className="bg-black/20 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl">
+                  <div className="text-center mb-8">
+                    <h2 className="text-3xl font-bold text-white mb-2">
+                      {isLogin ? 'Welcome Back!' : 'Join SkillArena'}
+                    </h2>
+                    <p className="text-gray-400">
+                      {isLogin ? 'Sign in to continue your journey' : 'Start your learning adventure today'}
                     </p>
-                    <button
-                      onClick={handleTrialAccess}
-                      className="w-full bg-gradient-to-r from-orange-600 to-yellow-600 text-white py-2 px-4 rounded-xl font-semibold hover:from-orange-700 hover:to-yellow-700 transition-all duration-200 transform hover:scale-105"
-                    >
-                      Start Free Trial
-                    </button>
                   </div>
-                )}
 
-                {trialAttempts >= 3 && (
-                  <div className="mb-6 bg-red-600/20 backdrop-blur-sm border border-red-500/20 rounded-2xl p-4 text-center">
-                    <p className="text-red-300 text-sm">
-                      Trial limit reached. Please sign up to continue exploring SkillArena.
-                    </p>
-                  </div>
-                )}
-
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  {!isLogin && (
-                    <>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="relative">
-                          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                          <input
-                            type="text"
-                            name="firstName"
-                            placeholder="First Name *"
-                            value={formData.firstName}
-                            onChange={handleInputChange}
-                            className="w-full bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl pl-10 pr-4 py-4 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
-                            required={!isLogin}
-                          />
-                        </div>
-                        <div className="relative">
-                          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                          <input
-                            type="text"
-                            name="lastName"
-                            placeholder="Last Name *"
-                            value={formData.lastName}
-                            onChange={handleInputChange}
-                            className="w-full bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl pl-10 pr-4 py-4 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
-                            required={!isLogin}
-                          />
-                        </div>
+                  {/* Error/Success Messages */}
+                  {error && (
+                    <div className="mb-6 bg-red-600/20 border border-red-500/30 rounded-xl p-4">
+                      <div className="flex items-start space-x-2">
+                        <AlertCircle className="h-5 w-5 text-red-400 flex-shrink-0" />
+                        <p className="text-red-300 text-sm">{error}</p>
                       </div>
-                      <div className="bg-blue-600/10 border border-blue-500/20 rounded-xl p-3">
-                        <p className="text-blue-300 text-xs">
-                          <strong>Required:</strong> Your full name will be displayed across your dashboard and certificates. Please use your real name as it appears on official documents.
-                        </p>
-                      </div>
-                    </>
-                  )}
-
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                    <input
-                      type="email"
-                      name="email"
-                      placeholder="Email Address"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      className="w-full bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl pl-10 pr-4 py-4 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
-                      autoComplete="email"
-                      required
-                    />
-                  </div>
-
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      name="password"
-                      placeholder="Password"
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      className="w-full bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl pl-10 pr-12 py-4 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
-                      autoComplete={isLogin ? "current-password" : "new-password"}
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
-                    >
-                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                    </button>
-                  </div>
-
-                  {!isLogin && (
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                      <input
-                        type="password"
-                        name="confirmPassword"
-                        placeholder="Confirm Password"
-                        value={formData.confirmPassword}
-                        onChange={handleInputChange}
-                        className="w-full bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl pl-10 pr-4 py-4 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
-                        required={!isLogin}
-                      />
                     </div>
                   )}
 
-                  {isLogin && (
-                    <div className="flex items-center justify-between">
-                      <label className="flex items-center space-x-2">
-                        <input type="checkbox" className="rounded bg-black/30 border-white/10 text-purple-600 focus:ring-purple-500/20" />
-                        <span className="text-gray-400 text-sm">Remember me</span>
-                      </label>
-                      <button type="button" className="text-purple-400 hover:text-purple-300 text-sm transition-colors">
-                        Forgot Password?
+                  {message && (
+                    <div className="mb-6 bg-green-600/20 border border-green-500/30 rounded-xl p-4">
+                      <p className="text-green-300 text-sm">{message}</p>
+                    </div>
+                  )}
+
+                  {/* Trial Option */}
+                  {canUseTrial && (
+                    <div className="mb-6 bg-gradient-to-r from-orange-600/20 to-yellow-600/20 backdrop-blur-sm border border-orange-500/20 rounded-2xl p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center space-x-2">
+                          <Timer className="h-5 w-5 text-orange-400" />
+                          <span className="text-orange-300 font-semibold">Try Before You Sign Up</span>
+                        </div>
+                        <span className="text-xs bg-orange-600/30 text-orange-200 px-2 py-1 rounded-full">
+                          {3 - trialAttempts} left
+                        </span>
+                      </div>
+                      <p className="text-orange-200 text-sm mb-3">
+                        Explore SkillArena with limited access. No signup required!
+                      </p>
+                      <button
+                        onClick={handleTrialAccess}
+                        className="w-full bg-gradient-to-r from-orange-600 to-yellow-600 text-white py-2 px-4 rounded-xl font-semibold hover:from-orange-700 hover:to-yellow-700 transition-all duration-200 transform hover:scale-105"
+                      >
+                        Start Free Trial
                       </button>
                     </div>
                   )}
 
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 text-white py-4 px-6 rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                  >
-                    {isLoading ? (
-                      <div className="flex items-center justify-center space-x-2">
-                        <Loader className="w-5 h-5 animate-spin" />
-                        <span>{isLogin ? 'Signing In...' : 'Creating Account...'}</span>
-                      </div>
-                    ) : (
-                      isLogin ? 'Sign In' : 'Create Account'
+                  {trialAttempts >= 3 && (
+                    <div className="mb-6 bg-red-600/20 backdrop-blur-sm border border-red-500/20 rounded-2xl p-4 text-center">
+                      <p className="text-red-300 text-sm">
+                        Trial limit reached. Please sign up to continue exploring SkillArena.
+                      </p>
+                    </div>
+                  )}
+
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    {!isLogin && (
+                      <>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="relative">
+                            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                            <input
+                              type="text"
+                              name="firstName"
+                              placeholder="First Name *"
+                              value={formData.firstName}
+                              onChange={handleInputChange}
+                              className="w-full bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl pl-10 pr-4 py-4 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
+                              required={!isLogin}
+                            />
+                          </div>
+                          <div className="relative">
+                            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                            <input
+                              type="text"
+                              name="lastName"
+                              placeholder="Last Name *"
+                              value={formData.lastName}
+                              onChange={handleInputChange}
+                              className="w-full bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl pl-10 pr-4 py-4 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
+                              required={!isLogin}
+                            />
+                          </div>
+                        </div>
+                        <div className="bg-blue-600/10 border border-blue-500/20 rounded-xl p-3">
+                          <p className="text-blue-300 text-xs">
+                            <strong>Required:</strong> Your full name will be displayed across your dashboard and certificates. Please use your real name as it appears on official documents.
+                          </p>
+                        </div>
+                      </>
                     )}
-                  </button>
-                </form>
 
-                {isOffline && (
-                  <div className="mt-6 mb-6 bg-yellow-600/20 border border-yellow-500/30 rounded-xl p-4 text-center">
-                    <p className="text-yellow-300 text-sm mb-3">
-                      You appear to be offline. Authentication requires an internet connection.
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                      <input
+                        type="email"
+                        name="email"
+                        placeholder="Email Address"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        className="w-full bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl pl-10 pr-4 py-4 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
+                        autoComplete="email"
+                        required
+                      />
+                    </div>
+
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        name="password"
+                        placeholder="Password"
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        className="w-full bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl pl-10 pr-12 py-4 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
+                        autoComplete={isLogin ? "current-password" : "new-password"}
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                      >
+                        {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                      </button>
+                    </div>
+
+                    {!isLogin && (
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                        <input
+                          type="password"
+                          name="confirmPassword"
+                          placeholder="Confirm Password"
+                          value={formData.confirmPassword}
+                          onChange={handleInputChange}
+                          className="w-full bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl pl-10 pr-4 py-4 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
+                          required={!isLogin}
+                        />
+                      </div>
+                    )}
+
+                    {isLogin && (
+                      <div className="flex items-center justify-between">
+                        <label className="flex items-center space-x-2">
+                          <input type="checkbox" className="rounded bg-black/30 border-white/10 text-purple-600 focus:ring-purple-500/20" />
+                          <span className="text-gray-400 text-sm">Remember me</span>
+                        </label>
+                        <button type="button" className="text-purple-400 hover:text-purple-300 text-sm transition-colors">
+                          Forgot Password?
+                        </button>
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={isLoading}
+                      className="w-full bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 text-white py-4 px-6 rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                    >
+                      {isLoading ? (
+                        <div className="flex items-center justify-center space-x-2">
+                          <Loader className="w-5 h-5 animate-spin" />
+                          <span>{isLogin ? 'Signing In...' : 'Creating Account...'}</span>
+                        </div>
+                      ) : (
+                        isLogin ? 'Sign In' : 'Create Account'
+                      )}
+                    </button>
+                  </form>
+
+                  {isOffline && (
+                    <div className="mt-6 mb-6 bg-yellow-600/20 border border-yellow-500/30 rounded-xl p-4 text-center">
+                      <p className="text-yellow-300 text-sm mb-3">
+                        You appear to be offline. Authentication requires an internet connection.
+                      </p>
+                      <button
+                        onClick={handleDemoLogin}
+                        className="bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-yellow-700 transition-colors"
+                      >
+                        Continue in Demo Mode
+                      </button>
+                    </div>
+                  )}
+
+                  <div className="mt-8 text-center">
+                    <p className="text-gray-400">
+                      {isLogin ? "Don't have an account?" : "Already have an account?"}
+                      <button
+                        onClick={() => {
+                          // Reset form when switching modes
+                          setIsLogin(!isLogin);
+                          setError(isOffline ? "You're currently offline. Some features may be limited." : null);
+                          // Keep the email when switching modes
+                          const email = formData.email;
+                          setMessage(null);
+                          setFormData({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '' });
+                        }}
+                        className="ml-2 text-purple-400 hover:text-purple-300 font-semibold transition-colors"
+                      >
+                        {isLogin ? 'Sign Up' : 'Sign In'}
+                      </button>
                     </p>
-                    <button
-                      onClick={handleDemoLogin}
-                      className="bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-yellow-700 transition-colors"
-                    >
-                      Continue in Demo Mode
-                    </button>
                   </div>
-                )}
 
-                <div className="mt-8 text-center">
-                  <p className="text-gray-400">
-                    {isLogin ? "Don't have an account?" : "Already have an account?"}
-                    <button
-                      onClick={() => {
-                        // Reset form when switching modes
-                        setIsLogin(!isLogin);
-                        setError(isOffline ? "You're currently offline. Some features may be limited." : null);
-                        // Keep the email when switching modes
-                        const email = formData.email;
-                        setMessage(null);
-                        setFormData({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '' });
-                      }}
-                      className="ml-2 text-purple-400 hover:text-purple-300 font-semibold transition-colors"
-                    >
-                      {isLogin ? 'Sign Up' : 'Sign In'}
-                    </button>
-                  </p>
-                </div>
-
-                <div className="mt-6 text-center">
-                  <div className="flex items-center justify-center space-x-4 text-xs text-gray-500">
-                    <span>Trusted by 50K+ learners</span>
-                    <div className="flex space-x-1">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="h-3 w-3 text-yellow-400 fill-current" />
-                      ))}
+                  <div className="mt-6 text-center">
+                    <div className="flex items-center justify-center space-x-4 text-xs text-gray-500">
+                      <span>Trusted by 50K+ learners</span>
+                      <div className="flex space-x-1">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="h-3 w-3 text-yellow-400 fill-current" />
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
