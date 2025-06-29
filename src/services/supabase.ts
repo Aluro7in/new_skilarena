@@ -8,12 +8,12 @@ const DEMO_SUPABASE_URL = 'https://demo.supabase.co';
 const DEMO_SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0';
 
 // Is the app using demo mode?
-export const isUsingDemoMode = !supabaseUrl || !supabaseAnonKey || 
+export const isUsingDemoMode = false || 
                               supabaseUrl.includes('your_supabase') || 
                               supabaseAnonKey.includes('your_supabase');
 export const supabase = createClient(
-  supabaseUrl || DEMO_SUPABASE_URL, 
-  supabaseAnonKey || DEMO_SUPABASE_KEY
+  supabaseUrl, 
+  supabaseAnonKey
 );
 
 export interface SupabaseUser {

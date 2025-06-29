@@ -60,6 +60,7 @@ export default function App() {
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [showTroubleshooter, setShowTroubleshooter] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'error'>('checking');
 
   // Check for success page parameters
   const urlParams = new URLSearchParams(window.location.search);
@@ -86,41 +87,48 @@ export default function App() {
   useEffect(() => {
     // Check for existing session
     const checkUser = async () => {
-      setError(null);
-      try {
-        const currentUser = await supabaseService.getCurrentUser();
-        if (currentUser) {
-          let subscription;
-          try {
-            // Add a timeout for subscription fetch to prevent long waits
-            const timeoutPromise = new Promise((_, reject) => 
-              setTimeout(() => reject(new Error('Subscription fetch timed out')), 5000)
-            );
-            subscription = await Promise.race([
-              subscriptionService.getCurrentUserSubscription(),
-              timeoutPromise
-            ]);
-          } catch (subscriptionError) {
-            console.warn('Unable to fetch subscription, using default', subscriptionError);
-          }
+      if (navigator.onLine) {
+        setError(null);
+        try {
+          setConnectionStatus('checking');
+          const currentUser = await supabaseService.getCurrentUser();
           
-          setUser({
-            name: currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || 'User',
-            email: currentUser.email || '',
-            subscription: subscription ? {
-              status: subscription.status,
-              planName: subscription.tier === 'freemium' ? 'Free' : 
-                       subscription.tier === 'premium' ? 'Premium Individual' : 
-                       'Teams & Enterprise'
-            } : undefined
-          });
+          if (currentUser) {
+            setConnectionStatus('connected');
+            let subscription;
+            try {
+              // Add a timeout for subscription fetch to prevent long waits
+              const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Subscription fetch timed out')), 5000)
+              );
+              subscription = await Promise.race([
+                subscriptionService.getCurrentUserSubscription(),
+                timeoutPromise
+              ]);
+            } catch (subscriptionError) {
+              console.warn('Unable to fetch subscription, using default', subscriptionError);
+            }
+            
+            setUser({
+              name: currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || 'User',
+              email: currentUser.email || '',
+              subscription: subscription ? {
+                status: subscription.status,
+                planName: subscription.tier === 'freemium' ? 'Free' : 
+                         subscription.tier === 'premium' ? 'Premium Individual' : 
+                         'Teams & Enterprise'
+              } : undefined
+            });
+          } else {
+            setConnectionStatus('connected');
+          }
+        } catch (error) {
+          console.error('Error checking user session:', error);
+          setConnectionStatus('error');
+          setError(error instanceof Error ? error : new Error('Unknown error during authentication'));
         }
-      } catch (error) {
-        console.error('Error checking user session:', error);
-        setError(error instanceof Error ? error : new Error('Unknown error during authentication'));
-      } finally {
-        setIsLoading(false);
       }
+      setIsLoading(false);
     };
 
     checkUser();

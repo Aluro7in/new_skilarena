@@ -60,15 +60,19 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
 
   const checkExistingSession = async () => {
     try {
-      const session = await supabaseService.getSession();
-      if (session?.user) {
-        onLogin({
-          name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'User',
-          email: session.user.email || ''
-        });
+      if (navigator.onLine) {
+        const session = await supabaseService.getSession();
+        if (session?.user) {
+          onLogin({
+            name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'User',
+            email: session.user.email || ''
+          });
+        }
       }
     } catch (error) {
-      console.error('Session check error:', error);
+      // Handle session check errors gracefully
+      console.warn('Session check error:', error);
+      setError('Unable to verify existing session. Please try signing in.');
     }
     setIsLoading(false);
   };

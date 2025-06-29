@@ -23,31 +23,19 @@ interface DiagnosticReport {
   recommendations: string[];
 }
 
-const ConnectionTroubleshooter: React.FC = () => {
-  const [report, setReport] = useState<DiagnosticReport | null>(null);
-  const [isRunning, setIsRunning] = useState(false);
-  const [showDetails, setShowDetails] = useState<Record<string, boolean>>({});
-
-  useEffect(() => {
-    runDiagnostic();
-  }, []);
-
-  const runDiagnostic = async () => {
-    setIsRunning(true);
-    try {
-      const diagnosticReport = await runConnectionDiagnostic();
-      setReport(diagnosticReport);
+      // Attempt to get team data from subscription service
+      const subscription = await subscriptionService.getCurrentUserSubscription();
       
-      // Initialize detail visibility state
-      const initialDetailsState: Record<string, boolean> = {};
-      Object.keys(diagnosticReport)
-        .filter(key => typeof diagnosticReport[key as keyof DiagnosticReport] === 'object')
-        .forEach(key => {
-          initialDetailsState[key] = false;
-        });
-      setShowDetails(initialDetailsState);
+      if (subscription && subscription.tier === 'teams') {
+        // If we have a team subscription, fetch team data
+        const teamData = await subscriptionService.getTeamSubscription(subscription.teamId || '');
+        setTeam(teamData);
+      } else {
+        setTeam(null);
+      }
     } catch (error) {
       console.error('Failed to run diagnostic:', error);
+      setTeam(null);
     } finally {
       setIsRunning(false);
     }
