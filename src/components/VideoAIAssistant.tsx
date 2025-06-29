@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Video, VideoOff, Mic, MicOff, Phone, PhoneOff, Settings, Users, Camera, AlertCircle, Loader } from 'lucide-react';
+import { Video, VideoOff, Mic, MicOff, Phone, PhoneOff, Settings, Users, Camera, AlertCircle, Loader, ChevronLeft } from 'lucide-react';
 import { tavusService } from '../services/tavus';
 
 interface TavusReplica {
@@ -139,6 +139,13 @@ const VideoAIAssistant: React.FC<VideoAIAssistantProps> = ({ isOpen, onClose }) 
       <div className="bg-gray-900 rounded-2xl p-6 max-w-5xl w-full max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-3">
+            <button
+              onClick={onClose}
+              className="bg-gray-800 hover:bg-gray-700 p-2 rounded-lg transition-colors mr-2"
+              title="Back to Dashboard"
+            >
+              <ChevronLeft className="h-5 w-5 text-gray-300" />
+            </button>
             <div className="bg-gradient-to-r from-purple-500 to-blue-500 p-2 rounded-xl">
               <Video className="h-6 w-6 text-white" />
             </div>
@@ -150,8 +157,15 @@ const VideoAIAssistant: React.FC<VideoAIAssistantProps> = ({ isOpen, onClose }) 
             </div>
           </div>
           <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors"
+            onClick={() => {
+              if (isConnected) {
+                endVideoConversation();
+              } else {
+                onClose();
+              }
+            }}
+            className="bg-red-600 hover:bg-red-700 p-2 rounded-lg transition-colors"
+            title="Close"
           >
             <PhoneOff className="h-6 w-6" />
           </button>
