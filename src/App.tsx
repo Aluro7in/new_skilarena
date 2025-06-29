@@ -59,6 +59,7 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const [showTroubleshooter, setShowTroubleshooter] = useState(false);
 
   // Check for success page parameters
   const urlParams = new URLSearchParams(window.location.search);
@@ -259,9 +260,6 @@ export default function App() {
   if (error) {
     return <ErrorFallback />;
   }
-
-  // Show troubleshooter on network errors with Supabase
-  const [showTroubleshooter, setShowTroubleshooter] = useState(false);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
