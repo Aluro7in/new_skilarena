@@ -16,20 +16,29 @@ export class SubscriptionService {
 
   async getCurrentUserSubscription(): Promise<UserSubscriptionData> {
     try {
-      // Always return a default subscription for demo mode
-      return {
-        tier: 'premium', // Use premium tier for demo mode to showcase all features
-        status: 'active',
-        usage: {
-          skillsThisMonth: 5,
-          tutorialsThisMonth: 3,
-          gameTestingThisMonth: 2,
-          challengesThisWeek: 1,
-          aiQuestionsToday: 10,
-          certificatesThisYear: 2,
-          storageUsedGB: 1.5,
-        },
-      };
+      const user = await supabaseService.getCurrentUser();
+      if (!user || supabaseService.isUsingDemoMode) {
+        // Return a premium subscription for demo mode to showcase all features
+        return {
+          tier: 'premium',
+          status: 'active',
+          usage: {
+            skillsThisMonth: 5,
+            tutorialsThisMonth: 3,
+            gameTestingThisMonth: 2,
+            challengesThisWeek: 1,
+            aiQuestionsToday: 10,
+            certificatesThisYear: 2,
+            storageUsedGB: 1.5,
+          },
+        };
+      }
+
+      const subscription = await supabaseService.getUserSubscription();
+      
+      if (!subscription) {
+        return this.getDefaultSubscription();
+      }
 
       // Mock usage data - in real app, this would come from database
       const usage = {

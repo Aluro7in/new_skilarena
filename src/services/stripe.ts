@@ -3,8 +3,9 @@ import { supabase } from './supabase';
 import { stripeProducts, type StripeProduct } from '../stripe-config';
 
 const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
-// Force demo mode
-const isStripeConfigured = false;
+const isStripeConfigured = !!stripePublishableKey && 
+                          !stripePublishableKey.includes('your_') && 
+                          !stripePublishableKey.includes('pk_test_placeholder');
 
 // Only attempt to load Stripe if we have a valid key
 const stripePromise = isStripeConfigured 
