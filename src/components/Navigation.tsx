@@ -10,6 +10,10 @@ interface NavigationProps {
 }
 
 const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange, user, onAIToggle, showTroubleshooter }) => {
+  // Ensure we have a fallback for user properties when null
+  const userName = user?.name || 'Guest';
+  const userEmail = user?.email || 'guest@example.com';
+  
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     { id: 'skills', label: 'Skills', icon: BookOpen },
@@ -119,10 +123,10 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange, user, o
                 </div>
                 <div className="hidden md:block text-left">
                   <div className="text-sm font-medium text-white">
-                    {user?.name || 'Demo User'}
+                    {userName}
                     {isUsingDemoMode && <span className="text-yellow-400 text-xs ml-1">(Demo)</span>}
                   </div>
-                  <div className="text-xs text-gray-400">Level 12</div>
+                  <div className="text-xs text-gray-400">{isUsingDemoMode ? 'Demo Mode' : 'Level 12'}</div>
                 </div>
               </button>
             </div>
