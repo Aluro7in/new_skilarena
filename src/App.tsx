@@ -97,50 +97,6 @@ export default function App() {
       });
       setConnectionStatus('connected');
       setIsLoading(false);
-      return;
-
-      if (navigator.onLine) {
-        setError(null);
-        try {
-          setConnectionStatus('checking');
-          const currentUser = await supabaseService.getCurrentUser();
-          
-          if (currentUser) {
-            setConnectionStatus('connected');
-            let subscription;
-            try {
-              // Add a timeout for subscription fetch to prevent long waits
-              const timeoutPromise = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('Subscription fetch timed out')), 5000)
-              );
-              subscription = await Promise.race([
-                subscriptionService.getCurrentUserSubscription(),
-                timeoutPromise
-              ]);
-            } catch (subscriptionError) {
-              console.warn('Unable to fetch subscription, using default', subscriptionError);
-            }
-            
-            setUser({
-              name: currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || 'User',
-              email: currentUser.email || '',
-              subscription: subscription ? {
-                status: subscription.status,
-                planName: subscription.tier === 'freemium' ? 'Free' : 
-                         subscription.tier === 'premium' ? 'Premium Individual' : 
-                         'Teams & Enterprise'
-              } : undefined
-            });
-          } else {
-            setConnectionStatus('connected');
-          }
-        } catch (error) {
-          console.error('Error checking user session:', error);
-          setConnectionStatus('error');
-          setError(error instanceof Error ? error : new Error('Unknown error during authentication'));
-        }
-      }
-      setIsLoading(false);
     };
 
     checkUser();
