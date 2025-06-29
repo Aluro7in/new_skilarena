@@ -16,23 +16,34 @@ export class SubscriptionService {
 
   async getCurrentUserSubscription(): Promise<UserSubscriptionData> {
     try {
-      // In demo mode, return premium subscription
+      const user = await supabaseService.getCurrentUser();
+      if (!user || supabaseService.isUsingDemoMode) {
+        return this.getDefaultSubscription();
+      }
+
+      const subscription = await supabaseService.getUserSubscription();
+      
+      if (!subscription) {
+        return this.getDefaultSubscription();
+      }
+
+      // Mock usage data - in real app, this would come from database
       const usage = {
-        skillsThisMonth: 5,
-        tutorialsThisMonth: 3,
-        gameTestingThisMonth: 2,
-        challengesThisWeek: 4,
-        aiQuestionsToday: 10,
-        certificatesThisYear: 2,
-        storageUsedGB: 5.5,
+        skillsThisMonth: 1,
+        tutorialsThisMonth: 0,
+        gameTestingThisMonth: 0,
+        challengesThisWeek: 1,
+        aiQuestionsToday: 3,
+        certificatesThisYear: 0,
+        storageUsedGB: 0.1,
       };
 
       this.userSubscription = {
-        tier: 'premium',
-        status: 'active',
-        currentPeriodStart: new Date(),
-        currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-        cancelAtPeriodEnd: false,
+        tier: this.mapStripeTierToSubscriptionTier(subscription.price_id),
+        status: subscription.subscription_status as any,
+        currentPeriodStart: subscription.current_period_start ? new Date(subscription.current_period_start * 1000) : undefined,
+        currentPeriodEnd: subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : undefined,
+        cancelAtPeriodEnd: subscription.cancel_at_period_end,
         usage,
       };
 

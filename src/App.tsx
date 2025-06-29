@@ -60,7 +60,6 @@ export default function App() {
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [showTroubleshooter, setShowTroubleshooter] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'error'>('checking');
 
   // Check for success page parameters
   const urlParams = new URLSearchParams(window.location.search);
@@ -71,76 +70,57 @@ export default function App() {
   // Demo mode activation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Always in demo mode now, but keep the Escape key functionality
-      if (e.key === 'Escape' && isDemoMode) setIsDemoMode(false);
+      if (e.key === 'F1' || (e.ctrlKey && e.key === 'd')) {
+        e.preventDefault();
+        setIsDemoMode(!isDemoMode);
+      }
+      if (e.key === 'Escape' && isDemoMode) {
+        setIsDemoMode(false);
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
-    
-    // Auto-enable demo mode on start
-    setIsDemoMode(true);
-    
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [isDemoMode]);
 
   useEffect(() => {
     // Check for existing session
     const checkUser = async () => {
-      // Skip real authentication in demo mode and immediately set a demo user
-      setUser({
-        name: 'Demo User',
-        email: 'demo@example.com',
-        subscription: {
-          status: 'active',
-          planName: 'Demo'
-        }
-      });
-      setConnectionStatus('connected');
-      setIsLoading(false);
-      return;
-
-      if (navigator.onLine) {
-        setError(null);
-        try {
-          setConnectionStatus('checking');
-          const currentUser = await supabaseService.getCurrentUser();
-          
-          if (currentUser) {
-            setConnectionStatus('connected');
-            let subscription;
-            try {
-              // Add a timeout for subscription fetch to prevent long waits
-              const timeoutPromise = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('Subscription fetch timed out')), 5000)
-              );
-              subscription = await Promise.race([
-                subscriptionService.getCurrentUserSubscription(),
-                timeoutPromise
-              ]);
-            } catch (subscriptionError) {
-              console.warn('Unable to fetch subscription, using default', subscriptionError);
-            }
-            
-            setUser({
-              name: currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || 'User',
-              email: currentUser.email || '',
-              subscription: subscription ? {
-                status: subscription.status,
-                planName: subscription.tier === 'freemium' ? 'Free' : 
-                         subscription.tier === 'premium' ? 'Premium Individual' : 
-                         'Teams & Enterprise'
-              } : undefined
-            });
-          } else {
-            setConnectionStatus('connected');
+      setError(null);
+      try {
+        const currentUser = await supabaseService.getCurrentUser();
+        if (currentUser) {
+          let subscription;
+          try {
+            // Add a timeout for subscription fetch to prevent long waits
+            const timeoutPromise = new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('Subscription fetch timed out')), 5000)
+            );
+            subscription = await Promise.race([
+              subscriptionService.getCurrentUserSubscription(),
+              timeoutPromise
+            ]);
+          } catch (subscriptionError) {
+            console.warn('Unable to fetch subscription, using default', subscriptionError);
           }
-        } catch (error) {
-          console.error('Error checking user session:', error);
-          setConnectionStatus('error');
-          setError(error instanceof Error ? error : new Error('Unknown error during authentication'));
+          
+          setUser({
+            name: currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || 'User',
+            email: currentUser.email || '',
+            subscription: subscription ? {
+              status: subscription.status,
+              planName: subscription.tier === 'freemium' ? 'Free' : 
+                       subscription.tier === 'premium' ? 'Premium Individual' : 
+                       'Teams & Enterprise'
+            } : undefined
+          });
         }
+      } catch (error) {
+        console.error('Error checking user session:', error);
+        setError(error instanceof Error ? error : new Error('Unknown error during authentication'));
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
     checkUser();
@@ -192,10 +172,6 @@ export default function App() {
       // Fallback for browsers that don't support smooth scrolling
       window.scrollTo(0, 0);
     }
-  };
-
-  const checkConnectionStatus = () => {
-    setShowTroubleshooter(true);
   };
 
   const renderContent = () => {
@@ -273,13 +249,12 @@ export default function App() {
     );
   }
 
-  if (isSuccessPage) {
-    return renderContent();
-  }
-
-  // Show auth page when no user is authenticated
   if (!user) {
     return <AuthPage onLogin={handleLogin} />;
+  }
+
+  if (isSuccessPage) {
+    return renderContent();
   }
 
   if (error) {
@@ -301,12 +276,11 @@ export default function App() {
       
       <div className="relative z-10">
         <Navigation 
-          showTroubleshooter={checkConnectionStatus}
+          showTroubleshooter={() => setShowTroubleshooter(true)}
           activeTab={activeTab} 
           onTabChange={handleTabChange} 
           user={user}
-          onAIToggle={() => setIsAIOpen(!isAIOpen)} 
-          hasConnectionIssues={connectionStatus === 'error' || !navigator.onLine}
+          onAIToggle={() => setIsAIOpen(!isAIOpen)}
         />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {showTroubleshooter ? (

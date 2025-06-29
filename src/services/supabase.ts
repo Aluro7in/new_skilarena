@@ -8,11 +8,12 @@ const DEMO_SUPABASE_URL = 'https://demo.supabase.co';
 const DEMO_SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0';
 
 // Is the app using demo mode?
-export const isUsingDemoMode = true; // Force demo mode always
-
+export const isUsingDemoMode = !supabaseUrl || !supabaseAnonKey || 
+                              supabaseUrl.includes('your_supabase') || 
+                              supabaseAnonKey.includes('your_supabase');
 export const supabase = createClient(
-  DEMO_SUPABASE_URL, 
-  DEMO_SUPABASE_KEY
+  supabaseUrl || DEMO_SUPABASE_URL, 
+  supabaseAnonKey || DEMO_SUPABASE_KEY
 );
 
 export interface SupabaseUser {
@@ -40,15 +41,17 @@ export interface UserSubscription {
 export class SupabaseService {
   async signUp(email: string, password: string, fullName?: string) {
     try {
-      // Always return mock data in demo mode
-      return {
-        user: {
-          id: 'demo-user-id',
-          email: email,
-          user_metadata: { full_name: fullName },
-          email_confirmed_at: new Date().toISOString()
-        }
-      };
+      if (isUsingDemoMode) {
+        // Return mock data in demo mode to prevent actual API calls
+        return {
+          user: {
+            id: 'demo-user-id',
+            email: email,
+            user_metadata: { full_name: fullName },
+            email_confirmed_at: new Date().toISOString()
+          }
+        };
+      }
 
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -74,15 +77,17 @@ export class SupabaseService {
 
   async signIn(email: string, password: string) {
     try {
-      // Always return mock data
-      return {
-        user: {
-          id: 'demo-user-id',
-          email: email,
-          user_metadata: { full_name: email.split('@')[0] },
-          email_confirmed_at: new Date().toISOString()
-        }
-      };
+      if (isUsingDemoMode) {
+        // Return mock data in demo mode to prevent actual API calls
+        return {
+          user: {
+            id: 'demo-user-id',
+            email: email,
+            user_metadata: { full_name: email.split('@')[0] },
+            email_confirmed_at: new Date().toISOString()
+          }
+        };
+      }
 
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -116,18 +121,6 @@ export class SupabaseService {
 
   async getCurrentUser(): Promise<SupabaseUser | null> {
     try {
-      // Always return a demo user in demo mode
-      return {
-        id: 'demo-user-id',
-        email: 'demo@example.com',
-        user_metadata: {
-          full_name: 'Demo User',
-          avatar_url: 'https://images.pexels.com/photos/1722198/pexels-photo-1722198.jpeg?auto=compress&cs=tinysrgb&w=150'
-        },
-        email_confirmed_at: new Date().toISOString()
-      };
-
-      // The code below will never execute but is kept for reference
       const { data: { user }, error } = await supabase.auth.getUser();
       if (error) {
         // Check if this is a session-related error (expected for unauthenticated users)
