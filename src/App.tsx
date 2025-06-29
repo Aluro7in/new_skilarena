@@ -21,6 +21,7 @@ import DemoShowcase from './components/DemoShowcase';
 import SubscriptionGate from './components/SubscriptionGate';
 import { supabaseService, type SupabaseUser } from './services/supabase';
 import { subscriptionService } from './services/subscriptionService';
+import ConnectionTroubleshooter from './components/ConnectionTroubleshooter';
 
 // Add error boundary fallback for the entire app
 const ErrorFallback = () => (
@@ -224,6 +225,8 @@ export default function App() {
             <TeamManagement />
           </SubscriptionGate>
         );
+      case 'connection-troubleshooter':
+        return <ConnectionTroubleshooter />;
       case 'profile':
         return <Profile user={user} onLogout={handleLogout} />;
       case 'student-upgrade':
@@ -257,6 +260,9 @@ export default function App() {
     return <ErrorFallback />;
   }
 
+  // Show troubleshooter on network errors with Supabase
+  const [showTroubleshooter, setShowTroubleshooter] = useState(false);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
       {/* Advanced Background Effects */}
@@ -272,16 +278,32 @@ export default function App() {
       
       <div className="relative z-10">
         <Navigation 
+          showTroubleshooter={() => setShowTroubleshooter(true)}
           activeTab={activeTab} 
           onTabChange={handleTabChange} 
           user={user}
           onAIToggle={() => setIsAIOpen(!isAIOpen)}
         />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {activeTab === 'dashboard' ? (
-            <Dashboard onTabChange={handleTabChange} onAIToggle={() => setIsAIOpen(!isAIOpen)} />
+          {showTroubleshooter ? (
+            <>
+              <button 
+                onClick={() => setShowTroubleshooter(false)}
+                className="mb-4 flex items-center text-purple-400 hover:text-purple-300 transition-colors"
+              >
+                <svg className="h-4 w-4 rotate-180 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+                Back to Dashboard
+              </button>
+              <ConnectionTroubleshooter />
+            </>
           ) : (
-            renderContent()
+            activeTab === 'dashboard' ? (
+              <Dashboard onTabChange={handleTabChange} onAIToggle={() => setIsAIOpen(!isAIOpen)} />
+            ) : (
+              renderContent()
+            )
           )}
         </main>
       </div>
