@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Mic, MicOff, Volume2, VolumeX, Phone, Settings, Waves, AlertCircle, Loader } from 'lucide-react';
+import { Mic, MicOff, Volume2, VolumeX, Phone, PhoneOff, Settings, Waves, AlertCircle, Loader, ChevronLeft } from 'lucide-react';
 import { elevenLabsService } from '../services/elevenlabs';
 import { openaiService } from '../services/openai';
 
@@ -147,6 +147,13 @@ const VoiceAIAssistant: React.FC<VoiceAIAssistantProps> = ({ isOpen, onClose }) 
       <div className="bg-gray-900 rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-3">
+            <button
+              onClick={onClose}
+              className="bg-gray-800 hover:bg-gray-700 p-2 rounded-lg transition-colors mr-2"
+              title="Back to Dashboard"
+            >
+              <ChevronLeft className="h-5 w-5 text-gray-300" />
+            </button>
             <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-2 rounded-xl">
               <Volume2 className="h-6 w-6 text-white" />
             </div>
@@ -159,9 +166,10 @@ const VoiceAIAssistant: React.FC<VoiceAIAssistantProps> = ({ isOpen, onClose }) 
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors"
+            className="bg-red-600 hover:bg-red-700 p-2 rounded-lg transition-colors"
+            title="Close"
           >
-            <Phone className="h-6 w-6" />
+            <PhoneOff className="h-6 w-6 text-white" />
           </button>
         </div>
 
