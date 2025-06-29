@@ -9,7 +9,7 @@ interface AuthPageProps {
 const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
-  const [showTrial, setShowTrial] = useState(true);
+  const [showTrial, setShowTrial] = useState(false);
   const [trialAttempts, setTrialAttempts] = useState(0);
   const [formData, setFormData] = useState({
     firstName: localStorage.getItem('savedFirstName') || '',
@@ -60,19 +60,15 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
 
   const checkExistingSession = async () => {
     try {
-      if (navigator.onLine) {
-        const session = await supabaseService.getSession();
-        if (session?.user) {
-          onLogin({
-            name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'User',
-            email: session.user.email || ''
-          });
-        }
+      const session = await supabaseService.getSession();
+      if (session?.user) {
+        onLogin({
+          name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'User',
+          email: session.user.email || ''
+        });
       }
     } catch (error) {
-      // Handle session check errors gracefully
-      console.warn('Session check error:', error);
-      setError('Unable to verify existing session. Please try signing in.');
+      console.error('Session check error:', error);
     }
     setIsLoading(false);
   };
@@ -128,28 +124,109 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
     e.preventDefault();
     setError(null);
     setMessage(null);
-    
-    // In demo mode, directly login with form data
-    handleDemoLogin();
-  };
 
-  const handleDemoLogin = () => {
-    const userName = !isLogin && formData.firstName.trim() ? 
-      `${formData.firstName.trim()} ${formData.lastName.trim()}` :
-      formData.email.trim() ? formData.email.split('@')[0] : 'Demo User';
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsLoading(true);
+
+    // Save non-sensitive form data for convenience (excluding password)
+    if (!isLogin) {
+      localStorage.setItem('savedFirstName', formData.firstName.trim());
+      localStorage.setItem('savedLastName', formData.lastName.trim());
+    }
+    localStorage.setItem('savedEmail', formData.email.trim());
+
+    try {
+      if (networkStatus === 'offline') {
+        // Special handling for offline mode
+        setTimeout(() => {
+          setError('Cannot sign in while offline. Please check your internet connection and try again.');
+          setIsLoading(false);
+        }, 1500);
+        return;
+      }
+
+      if (isLogin) {
+        const { user } = await supabaseService.signIn(formData.email.trim(), formData.password);
+        if (user) {
+          onLogin({
+            name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
+            email: user.email || ''
+          });
+          localStorage.removeItem('savedFirstName');
+          localStorage.removeItem('savedLastName');
+        }
+      } else {
+        const fullName = `${formData.firstName.trim()} ${formData.lastName.trim()}`;
+        const { user } = await supabaseService.signUp(
+          formData.email.trim(), 
+          formData.password, 
+          fullName
+        );
+        
+        if (user) {
+          if (user.email_confirmed_at) {
+            // User is immediately confirmed
+            onLogin({
+              name: fullName || user.email?.split('@')[0] || 'User',
+              email: user.email || ''
+            });
+            localStorage.removeItem('savedFirstName');
+            localStorage.removeItem('savedLastName');
+          } else {
+            // Email confirmation required
+            setMessage('Please check your email and click the confirmation link to complete your registration.');
+            setIsLogin(true);
+            setFormData({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '' });
+          }
+        }
+      }
+    } catch (err: any) {
+      console.error('Auth error:', err);
       
-    onLogin({ 
-      name: userName, 
-      email: formData.email.trim() || 'demo@example.com' 
-    });
+      // Network connectivity check
+      if (!navigator.onLine || err.message?.includes('offline') || err.message?.includes('fetch')) {
+        setError('Network connection issue. Please check your internet connection and try again.');
+      }
+      // API server unreachable
+      else if (err.message?.includes('CORS') || err.message?.includes('Failed to')) {
+        setError('Unable to reach authentication server. Please try again later or contact support.');
+      }
+      // Other errors
+      // Provide more user-friendly error messages
+      if (err.message?.includes('fetch') || !navigator.onLine) {
+        setError('Network connection error. Please check your internet connection and try again.');
+      } else {
+        setError(err.message || 'An unexpected error occurred. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleTrialAccess = () => {
+    const currentAttempts = trialAttempts + 1;
+    const trialSession = {
+      sessionId: Date.now().toString(),
+      attempts: currentAttempts,
+      maxAttempts: 3,
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+    };
+    
+    localStorage.setItem('skillArenaTrialSession', JSON.stringify(trialSession));
+    setTrialAttempts(currentAttempts);
+    
     // Temporary trial user
     onLogin({
-      name: `Trial User`,
+      name: `Trial User ${currentAttempts}`,
       email: 'trial@skillarena.com'
     });
+  };
+
+  const handleDemoLogin = () => {
+    onLogin({ name: 'Demo User', email: 'demo@example.com' });
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -197,16 +274,17 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
       <div className="relative z-10 w-full max-w-6xl mx-auto px-4">
         {/* Network Status Indicator */}
         {isOffline && (
-          <div className="mb-4 bg-yellow-600/20 border border-yellow-500/30 rounded-xl p-4 text-center">
-            <p className="text-yellow-300 text-sm">
-              You appear to be offline. Some features may be limited.
-            </p>
+          <div className="fixed top-4 right-4 bg-red-600/90 text-white py-2 px-4 rounded-lg flex items-center shadow-lg animate-pulse z-50">
+            <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636a9 9 0 010 12.728m-6.364 0a3 3 0 000-4.243m0-6.364a3 3 0 00-4.243 4.243m4.242-4.242L18.364 5.636" />
+            </svg>
+            <span className="text-sm font-medium">Offline Mode</span>
           </div>
         )}
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Left Side - Branding & Info */}
-          <div>
+          <div className="text-center lg:text-left">
             <div className="flex items-center justify-center lg:justify-start space-x-3 mb-8">
               <div className="bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-500 p-3 rounded-xl shadow-2xl">
                 <Star className="h-8 w-8 text-white" />
@@ -221,7 +299,9 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
 
             <h1 className="text-5xl font-bold text-white mb-6">
               Transform Your
-              <br />
+              <span className="bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent block">
+                Gaming Passion
+              </span>
               Into a Career
             </h1>
 
