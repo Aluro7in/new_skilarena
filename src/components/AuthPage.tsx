@@ -197,9 +197,16 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
       <div className="relative z-10 w-full max-w-6xl mx-auto px-4">
         {/* Network Status Indicator */}
         {isOffline && (
+          <div className="mb-4 bg-yellow-600/20 border border-yellow-500/30 rounded-xl p-4 text-center">
+            <p className="text-yellow-300 text-sm">
+              You appear to be offline. Some features may be limited.
+            </p>
+          </div>
+        )}
+        
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Left Side - Branding & Info */}
-              You appear to be offline. Some features may be limited.
+          <div>
             <div className="flex items-center justify-center lg:justify-start space-x-3 mb-8">
               <div className="bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-500 p-3 rounded-xl shadow-2xl">
                 <Star className="h-8 w-8 text-white" />
@@ -207,13 +214,14 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
               <div>
                 <span className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">
                   SkillArena
-        {(
+                </span>
                 <div className="text-sm text-gray-400">Level Up Your Skills</div>
               </div>
             </div>
 
             <h1 className="text-5xl font-bold text-white mb-6">
               Transform Your
+              <br />
               Into a Career
             </h1>
 
