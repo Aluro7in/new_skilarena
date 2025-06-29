@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { RefreshCw, CheckCircle, AlertTriangle, XCircle, ExternalLink, Database, Wifi, Globe, Shield, Server, Key } from 'lucide-react';
+import { RefreshCw, CheckCircle, AlertTriangle, XCircle, ExternalLink, Database, Wifi, Globe, Shield, Server, Key, Loader, Cloud } from 'lucide-react';
 import { runConnectionDiagnostic } from '../utils/connectionDiagnostic';
 import { supabaseService, isUsingDemoMode } from '../services/supabase';
+import { getDeploymentStatus } from '../utils/deploymentStatus';
 
 interface DiagnosticResult {
   status: 'success' | 'error' | 'warning';
@@ -26,9 +27,32 @@ interface DiagnosticReport {
 const ConnectionTroubleshooter = () => {
   const [isRunning, setIsRunning] = useState(false);
   const [report, setReport] = useState<DiagnosticReport | null>(null);
+  const [deployStatus, setDeployStatus] = useState<{
+    status: string;
+    message: string;
+    lastChecked: Date;
+  } | null>(null);
   const [showDetails, setShowDetails] = useState<Record<string, boolean>>({});
-  const [team, setTeam] = useState(null);
+  const [isCheckingDeployment, setIsCheckingDeployment] = useState(false);
 
+  useEffect(() => {
+    runDiagnostic();
+  }, []);
+
+  // Separate function to check deployment status
+  const checkDeploymentStatus = async () => {
+    setIsCheckingDeployment(true);
+    try {
+      const status = await getDeploymentStatus();
+      setDeployStatus({
+        status: status.status,
+        message: status.message,
+        lastChecked: new Date()
+      });
+    } catch (error) {
+      console.error("Failed to check deployment status:", error);
+    } finally {
+      setIsCheckingDeployment(false);
   const runDiagnostic = async () => {
     setIsRunning(true);
     try {
@@ -92,6 +116,20 @@ const ConnectionTroubleshooter = () => {
     }
   };
 
+  // Special function for deployment status icon
+  const getDeploymentStatusIcon = (status: string) => {
+    switch (status) {
+      case 'deployed':
+        return <Cloud className="h-5 w-5 text-green-400" />;
+      case 'deploying':
+        return <Loader className="h-5 w-5 text-blue-400 animate-spin" />;
+      case 'failed':
+        return <AlertTriangle className="h-5 w-5 text-red-400" />;
+      default:
+        return <Cloud className="h-5 w-5 text-gray-400" />;
+    }
+  };
+
   const getStatusColor = (status: 'success' | 'error' | 'warning') => {
     switch (status) {
       case 'success':
@@ -143,6 +181,21 @@ const ConnectionTroubleshooter = () => {
               <li>Supabase credentials are missing or using placeholder values</li>
               <li>The app is falling back to demo mode for demonstration purposes</li>
             </ul>
+
+            {/* Deployment Status - New Section */}
+            {report.deploymentStatus && (
+              <div className="mt-4">
+                <div className="flex items-center space-x-2">
+                  {getDeploymentStatusIcon(report.deploymentStatus.status)}
+                  <div className="text-sm text-gray-300">
+                    Deployment Status: <span className={report.deploymentStatus.status === 'deployed' ? 'text-green-400' : report.deploymentStatus.status === 'deploying' ? 'text-blue-400' : 'text-yellow-400'}>
+                      {report.deploymentStatus.status.charAt(0).toUpperCase() + report.deploymentStatus.status.slice(1)}
+                    </span>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-400 mt-1 ml-7">{report.deploymentStatus.message}</p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -166,6 +219,11 @@ const ConnectionTroubleshooter = () => {
             <ExternalLink className="h-4 w-4" />
           </a>
         </div>
+    deploymentStatus?: {
+      status: string;
+      message: string;
+      lastChecked: string;
+    };
       </div>
     );
   }
@@ -192,6 +250,7 @@ const ConnectionTroubleshooter = () => {
           <div className="text-center">
             <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
             <p className="text-white text-lg">Running diagnostics...</p>
+            <p className="text-gray-400 text-sm mt-2">Checking connection, configuration, and deployment status...</p>
           </div>
         </div>
       ) : report ? (
@@ -401,18 +460,58 @@ const ConnectionTroubleshooter = () => {
           </div>
         </div>
       ) : (
-        <div className="bg-black/20 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center">
-          <div className="w-16 h-16 bg-purple-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="bg-black/20 backdrop-blur-xl border border-white/10 rounded-2xl p-6 flex flex-col items-center justify-center">
+          <div className="w-16 h-16 bg-purple-600/20 rounded-full flex items-center justify-center mb-4">
             <Database className="h-8 w-8 text-purple-400" />
           </div>
           <h3 className="text-xl font-bold text-white mb-2">Connection Status Unknown</h3>
-          <p className="text-gray-300 mb-4">Run the diagnostic to check your Supabase connection</p>
+          <p className="text-gray-300 mb-6">Run the diagnostic to check your Supabase connection</p>
+          
           <button
             onClick={runDiagnostic}
-            className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all transform hover:scale-105"
+            className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all transform hover:scale-105 mb-4"
           >
-            Start Diagnostic
+            Run Full Diagnostic
           </button>
+          
+          <button
+            onClick={checkDeploymentStatus}
+            disabled={isCheckingDeployment}
+            className="flex items-center space-x-2 bg-black/30 backdrop-blur-sm border border-white/10 text-white px-4 py-2 rounded-lg hover:bg-black/50 transition-all disabled:opacity-50"
+          >
+            {isCheckingDeployment ? (
+              <>
+                <Loader className="h-4 w-4 animate-spin" />
+                <span>Checking deployment...</span>
+              </>
+            ) : (
+              <>
+                <Cloud className="h-4 w-4" />
+                <span>Check Deployment Status Only</span>
+              </>
+            )}
+          </button>
+          
+          {deployStatus && !isCheckingDeployment && (
+            <div className={`mt-6 p-4 rounded-xl ${
+              deployStatus.status === 'deployed' ? 'bg-green-600/20 border border-green-500/30' :
+              deployStatus.status === 'deploying' ? 'bg-blue-600/20 border border-blue-500/30' :
+              'bg-yellow-600/20 border border-yellow-500/30'
+            }`}>
+              <div className="flex items-center space-x-2">
+                {getDeploymentStatusIcon(deployStatus.status)}
+                <span className="text-white font-medium">
+                  {deployStatus.status === 'deployed' ? 'Deployment Status: Active' :
+                   deployStatus.status === 'deploying' ? 'Deployment Status: In Progress' :
+                   'Deployment Status: Attention Needed'}
+                </span>
+              </div>
+              <p className="text-gray-300 mt-2">{deployStatus.message}</p>
+              <p className="text-xs text-gray-400 mt-2">
+                Last checked: {deployStatus.lastChecked.toLocaleTimeString()}
+              </p>
+            </div>
+          )}
         </div>
       )}
 

@@ -1,4 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { getDeploymentStatus } from './deploymentStatus';
 
 interface DiagnosticResult {
   status: 'success' | 'error' | 'warning';
@@ -18,9 +19,14 @@ interface DiagnosticReport {
   databaseConnection: DiagnosticResult;
   overallStatus: string;
   recommendations: string[];
+  deploymentStatus?: {
+    status: string;
+    message: string;
+    lastChecked: string;
+  };
 }
 
-export async function runConnectionDiagnostic(): Promise<DiagnosticReport> {
+export async function runConnectionDiagnostic(supabaseService?: any): Promise<DiagnosticReport> {
   const timestamp = new Date().toISOString();
   const recommendations: string[] = [];
   const report: Partial<DiagnosticReport> = {
@@ -82,6 +88,24 @@ export async function runConnectionDiagnostic(): Promise<DiagnosticReport> {
   report.databaseConnection = dbConnectionResult;
   if (dbConnectionResult.status !== 'success') {
     recommendations.push(dbConnectionResult.suggestion || 'Check database connection status in Supabase dashboard');
+  }
+  
+  // 7. Check deployment status if needed
+  if (supabaseService) {
+    try {
+      const deploymentStatus = await getDeploymentStatus();
+      report.deploymentStatus = {
+        status: deploymentStatus.status,
+        message: deploymentStatus.message,
+        lastChecked: new Date().toISOString()
+      };
+      
+      if (deploymentStatus.status === 'failed') {
+        recommendations.push('Check your Supabase project deployment status. Some services may not be fully deployed.');
+      }
+    } catch (error) {
+      console.error('Failed to check deployment status:', error);
+    }
   }
 
   // Determine overall status
@@ -197,7 +221,10 @@ function checkSupabaseKey(key?: string): DiagnosticResult {
 }
 
 function checkNetworkConnectivity(): DiagnosticResult {
-  if (!navigator.onLine) {
+  // Do a more thorough check beyond just navigator.onLine
+  const isOnline = navigator.onLine;
+  
+  if (!isOnline) {
     return {
       status: 'error',
       message: 'No internet connection',

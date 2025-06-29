@@ -31,7 +31,7 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange, user, o
     <nav className="bg-black/20 backdrop-blur-xl border-b border-white/10 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3" onClick={() => onTabChange('dashboard')}>
             <div className="bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-500 p-2 rounded-xl shadow-2xl transform hover:scale-110 transition-all duration-300 hover:shadow-purple-500/50">
               <Star className="h-6 w-6 text-white" />
             </div>
@@ -45,16 +45,22 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange, user, o
           
           <div className="flex items-center space-x-3">
             {/* Connection status indicator */}
-            {hasConnectionIssues && (
-              <button
-                onClick={showTroubleshooter}
-                className="bg-red-600/20 border border-red-500/30 text-white p-2 rounded-lg hover:bg-red-600/30 transition-all relative animate-pulse"
-                title="Connection Issues Detected"
-              >
-                <AlertTriangle className="h-5 w-5 text-red-400" />
+            <button
+              onClick={showTroubleshooter}
+              className={`border text-white p-2 rounded-lg transition-all relative group ${
+                hasConnectionIssues 
+                  ? 'bg-red-600/20 border-red-500/30 hover:bg-red-600/30 animate-pulse' 
+                  : 'bg-black/30 border-white/10 hover:bg-black/50'
+              }`}
+              title={hasConnectionIssues ? "Connection Issues Detected" : "Check Connection Status"}
+            >
+              <AlertTriangle className={`h-5 w-5 ${
+                hasConnectionIssues ? 'text-red-400' : 'text-gray-400 group-hover:text-white'
+              }`} />
+              {hasConnectionIssues && (
                 <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-              </button>
-            )}
+              )}
+            </button>
 
             {/* Navigation Tabs - Scrollable on smaller screens */}
             <div className="flex space-x-1 bg-black/30 backdrop-blur-sm rounded-2xl p-1 border border-white/10 overflow-x-auto max-w-3xl">
