@@ -5,8 +5,12 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Use default values for demo mode if environment variables are missing
 const DEMO_SUPABASE_URL = 'https://demo.supabase.co';
-const DEMO_SUPABASE_KEY = 'demo-key';
+const DEMO_SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0';
 
+// Is the app using demo mode?
+export const isUsingDemoMode = !supabaseUrl || !supabaseAnonKey || 
+                              supabaseUrl.includes('your_supabase') || 
+                              supabaseAnonKey.includes('your_supabase');
 export const supabase = createClient(
   supabaseUrl || DEMO_SUPABASE_URL, 
   supabaseAnonKey || DEMO_SUPABASE_KEY
@@ -37,6 +41,18 @@ export interface UserSubscription {
 export class SupabaseService {
   async signUp(email: string, password: string, fullName?: string) {
     try {
+      if (isUsingDemoMode) {
+        // Return mock data in demo mode to prevent actual API calls
+        return {
+          user: {
+            id: 'demo-user-id',
+            email: email,
+            user_metadata: { full_name: fullName },
+            email_confirmed_at: new Date().toISOString()
+          }
+        };
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -61,6 +77,18 @@ export class SupabaseService {
 
   async signIn(email: string, password: string) {
     try {
+      if (isUsingDemoMode) {
+        // Return mock data in demo mode to prevent actual API calls
+        return {
+          user: {
+            id: 'demo-user-id',
+            email: email,
+            user_metadata: { full_name: email.split('@')[0] },
+            email_confirmed_at: new Date().toISOString()
+          }
+        };
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -199,6 +227,10 @@ export class SupabaseService {
   }
 
   private getReadableErrorMessage(errorMessage: string): string {
+    if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
+      return 'Network error. Please check your internet connection and try again.';
+    }
+    
     switch (errorMessage) {
       case 'Invalid login credentials':
         return 'Invalid email or password. Please check your credentials and try again.';
