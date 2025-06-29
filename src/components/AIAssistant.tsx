@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Bot, Send, X, MessageSquare, Minimize2, Maximize2, Sparkles, Zap, AlertCircle, Wifi, WifiOff, Video, Mic } from 'lucide-react';
 import { openaiService, type AIMessage } from '../services/openai';
 import VideoAIAssistant from './VideoAIAssistant';
-import VoiceAIAssistant from './VoiceAIAssistant';
+import VoiceAIAssistant from './VoiceAIAssistant'; 
 
 interface Message {
   id: string;
@@ -20,9 +20,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ isOpen, onToggle }) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      content: openaiService.isApiConfigured() 
-        ? "Hi! I'm your AI learning assistant powered by ChatGPT. I can help you with game development, programming, career advice, or any questions about SkillArena. You can also try my video or voice modes for a more interactive experience! What would you like to know?"
-        : "Hi! I'm your AI learning assistant. I can help you with game development, programming, career advice, or any questions about SkillArena. You can also try my video or voice modes for a more interactive experience! What would you like to know?",
+      content: "Hi! I'm your AI learning assistant powered by ChatGPT. I can help you with game development, programming, career advice, or any questions about SkillArena. You can also try my video or voice modes for a more interactive experience! What would you like to know?",
       role: 'assistant',
       timestamp: new Date()
     }
@@ -61,6 +59,9 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ isOpen, onToggle }) => {
       return;
     }
 
+    // Log that we're sending a request to OpenAI
+    console.log("Sending request to AI assistant");
+    
     const userMessage: Message = {
       id: Date.now().toString(),
       content: inputValue,
@@ -74,6 +75,9 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ isOpen, onToggle }) => {
     setIsLoading(true);
     setError(null);
 
+    // Log the start of the AI processing
+    const processingStart = Date.now();
+
     try {
       // Convert messages to OpenAI format
       const messagesToSend = [...messages, userMessage].slice(-10); // Only send last 10 messages to avoid token limits
@@ -84,12 +88,16 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ isOpen, onToggle }) => {
 
       const response = await openaiService.generateResponse(conversationHistory);
       
+      // Log successful response
+      console.log(`AI response received in ${Date.now() - processingStart}ms`);
+      
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         content: response,
         role: 'assistant',
         timestamp: new Date()
       };
+      
 
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error: any) {
@@ -124,9 +132,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ isOpen, onToggle }) => {
   const clearConversation = () => {
     setMessages([{
       id: '1',
-      content: openaiService.isApiConfigured() 
-        ? "Hi! I'm your AI learning assistant powered by ChatGPT. I can help you with game development, programming, career advice, or any questions about SkillArena. You can also try my video or voice modes for a more interactive experience! What would you like to know?"
-        : "Hi! I'm your AI learning assistant. I can help you with game development, programming, career advice, or any questions about SkillArena. You can also try my video or voice modes for a more interactive experience! What would you like to know?",
+      content: "Hi! I'm your AI learning assistant powered by ChatGPT. I can help you with game development, programming, career advice, or any questions about SkillArena. You can also try my video or voice modes for a more interactive experience! What would you like to know?",
       role: 'assistant',
       timestamp: new Date()
     }]);
@@ -151,7 +157,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ isOpen, onToggle }) => {
         <div className={`absolute -top-2 -right-2 w-3 h-3 rounded-full animate-pulse ${
           openaiService.isApiConfigured() ? 'bg-green-400' : 'bg-yellow-400'
         }`}></div>
-        <div className="absolute -top-12 right-0 bg-black/80 backdrop-blur-sm text-white px-3 py-1 rounded-lg text-sm opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+        <div className="absolute -top-12 right-0 bg-black/80 backdrop-blur-sm text-white px-3 py-1 rounded-lg text-sm opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
           AI Assistant {openaiService.isApiConfigured() ? '(Live)' : '(Demo)'}
         </div>
       </button>
@@ -252,8 +258,13 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ isOpen, onToggle }) => {
                       {message.role === 'assistant' && (
                         <div className="flex items-center space-x-2 mb-2">
                           <Sparkles className="h-3 w-3 text-purple-400" />
-                          <span className="text-xs text-purple-400 font-semibold">
+                          <span className="text-xs text-purple-400 font-semibold flex items-center space-x-1">
+                            <span>
                             AI Assistant {openaiService.isApiConfigured() ? '(ChatGPT)' : '(Demo)'}
+                            </span>
+                            {openaiService.isApiConfigured() && 
+                              <span className="bg-green-500/20 text-green-400 text-[10px] px-1.5 rounded-full border border-green-500/20">Live</span>
+                            }
                           </span>
                         </div>
                       )}
@@ -322,14 +333,15 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ isOpen, onToggle }) => {
                   disabled={!inputValue.trim() || isLoading}
                   className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-3 rounded-xl hover:shadow-lg hover:shadow-purple-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 disabled:transform-none flex-shrink-0"
                 >
-                  <Send className="h-4 w-4" />
+                  <Send className={`h-4 w-4 ${inputValue.trim() ? 'text-white' : 'text-gray-500'}`} />
                 </button>
               </div>
               <div className="text-xs text-gray-500 mt-2 text-center">
                 {openaiService.isApiConfigured() 
                   ? 'AI Assistant powered by ChatGPT • Live responses • Video & Voice modes available'
                   : 'AI Assistant • Demo mode with smart responses • Video & Voice modes available'
-                }
+                } 
+                {openaiService.isApiConfigured() && <span>• API Connected</span>}
               </div>
             </div>
           </>

@@ -287,6 +287,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onTabChange, onAIToggle = () => {
             >
               <Video className="h-4 w-4" />
               <span>Try Video AI</span>
+              {openaiService.isApiConfigured() && (
+                <span className="ml-1 bg-green-500/20 text-green-400 text-[10px] px-1.5 rounded-full border border-green-500/20">Live</span>
+              )}
             </button>
           </div>
 
@@ -322,6 +325,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onTabChange, onAIToggle = () => {
             >
               <Mic className="h-4 w-4" />
               <span>Try Voice AI</span>
+              {openaiService.isApiConfigured() && (
+                <span className="ml-1 bg-green-500/20 text-green-400 text-[10px] px-1.5 rounded-full border border-green-500/20">Live</span>
+              )}
             </button>
           </div>
 
