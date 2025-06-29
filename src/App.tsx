@@ -281,6 +281,11 @@ export default function App() {
     return <ErrorFallback />;
   }
 
+  // Show auth page if user is not logged in
+  if (!user) {
+    return <AuthPage onLogin={handleLogin} />;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
       {/* Advanced Background Effects */}
