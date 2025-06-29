@@ -34,16 +34,8 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# Supabase Edge Functions proxy (for development/testing)
-[[redirects]]
-  from = "/api/functions/*"
-  to = "https://your-project.supabase.co/functions/v1/:splat"
-  status = 200
-  force = true
-
-# Handle Stripe webhooks
-[[redirects]]
-  from = "/api/stripe/webhook"
-  to = "https://your-project.supabase.co/functions/v1/stripe-webhook"
-  status = 200
-  force = true
+# Handle media access for AI features
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Permissions-Policy = "camera=(self), microphone=(self), geolocation=()"

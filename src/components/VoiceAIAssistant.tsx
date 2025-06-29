@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Mic, MicOff, Volume2, VolumeX, Phone, Settings, Waves } from 'lucide-react';
+import { Mic, MicOff, Volume2, VolumeX, Phone, Settings, Waves, AlertCircle, Loader } from 'lucide-react';
 import { elevenLabsService } from '../services/elevenlabs';
 import { openaiService } from '../services/openai';
 
@@ -24,13 +24,32 @@ const VoiceAIAssistant: React.FC<VoiceAIAssistantProps> = ({ isOpen, onClose }) 
   const [response, setResponse] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasPermission, setHasPermission] = useState(false);
   const [conversationHistory, setConversationHistory] = useState<Array<{role: 'user' | 'assistant', content: string}>>([]);
 
   useEffect(() => {
     if (isOpen) {
       loadVoices();
+      requestMicrophonePermission();
     }
   }, [isOpen]);
+
+  const requestMicrophonePermission = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(track => track.stop()); // Stop immediately after getting permission
+      setHasPermission(true);
+      setError(null);
+    } catch (error: any) {
+      console.error('Microphone permission denied:', error);
+      setHasPermission(false);
+      setError(
+        error.name === 'NotAllowedError' 
+          ? 'Microphone access denied. Please allow microphone access to use voice AI features.'
+          : 'Unable to access microphone. Please check your device settings.'
+      );
+    }
+  };
 
   const loadVoices = async () => {
     try {
@@ -45,6 +64,11 @@ const VoiceAIAssistant: React.FC<VoiceAIAssistantProps> = ({ isOpen, onClose }) 
   };
 
   const startListening = async () => {
+    if (!hasPermission) {
+      await requestMicrophonePermission();
+      return;
+    }
+
     if (!elevenLabsService.isSpeechRecognitionAvailable()) {
       setError('Speech recognition is not available in your browser');
       return;
@@ -119,8 +143,8 @@ const VoiceAIAssistant: React.FC<VoiceAIAssistantProps> = ({ isOpen, onClose }) 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
-      <div className="bg-gray-900 rounded-2xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-gray-900 rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-3">
             <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-2 rounded-xl">
@@ -140,6 +164,24 @@ const VoiceAIAssistant: React.FC<VoiceAIAssistantProps> = ({ isOpen, onClose }) 
             <Phone className="h-6 w-6" />
           </button>
         </div>
+
+        {/* Permission Error */}
+        {error && (
+          <div className="mb-6 bg-red-600/20 border border-red-500/30 rounded-xl p-4">
+            <div className="flex items-center space-x-2">
+              <AlertCircle className="h-5 w-5 text-red-400" />
+              <p className="text-red-300 text-sm">{error}</p>
+            </div>
+            {!hasPermission && (
+              <button
+                onClick={requestMicrophonePermission}
+                className="mt-3 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+              >
+                Grant Microphone Access
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Voice Selection */}
         <div className="mb-6">
@@ -164,46 +206,51 @@ const VoiceAIAssistant: React.FC<VoiceAIAssistantProps> = ({ isOpen, onClose }) 
           </div>
         </div>
 
-        {/* Error Display */}
-        {error && (
-          <div className="mb-4 bg-red-600/20 border border-red-500/30 rounded-xl p-3">
-            <p className="text-red-300 text-sm">{error}</p>
-          </div>
-        )}
-
         {/* Voice Interface */}
         <div className="space-y-6">
           {/* Main Voice Button */}
           <div className="text-center">
             <button
               onClick={isListening ? undefined : startListening}
-              disabled={isListening || isProcessing || isSpeaking}
+              disabled={isListening || isProcessing || isSpeaking || !hasPermission}
               className={`w-32 h-32 rounded-full flex items-center justify-center transition-all transform ${
                 isListening
-                  ? 'bg-red-500 hover:bg-red-600 animate-pulse'
+                  ? 'bg-red-500 hover:bg-red-600 animate-pulse scale-110'
                   : isProcessing
-                  ? 'bg-yellow-500 animate-spin'
+                  ? 'bg-yellow-500 animate-pulse'
                   : isSpeaking
-                  ? 'bg-blue-500 animate-pulse'
+                  ? 'bg-blue-500 animate-pulse scale-105'
                   : 'bg-green-500 hover:bg-green-600 hover:scale-105'
-              } disabled:opacity-50 disabled:cursor-not-allowed`}
+              } disabled:opacity-50 disabled:cursor-not-allowed shadow-2xl ${
+                isListening ? 'shadow-red-500/50' : 
+                isProcessing ? 'shadow-yellow-500/50' :
+                isSpeaking ? 'shadow-blue-500/50' : 'shadow-green-500/50'
+              }`}
             >
               {isListening ? (
-                <Waves className="h-12 w-12 text-white" />
+                <Waves className="h-12 w-12 text-white animate-pulse" />
               ) : isProcessing ? (
-                <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin" />
+                <Loader className="h-12 w-12 text-white animate-spin" />
               ) : isSpeaking ? (
                 <Volume2 className="h-12 w-12 text-white" />
               ) : (
                 <Mic className="h-12 w-12 text-white" />
               )}
             </button>
-            <p className="text-white mt-4 font-semibold">
+            <p className="text-white mt-4 font-semibold text-lg">
               {isListening ? 'Listening...' : 
                isProcessing ? 'Processing...' :
                isSpeaking ? 'Speaking...' :
+               !hasPermission ? 'Need microphone access' :
                'Tap to speak'}
             </p>
+            
+            {hasPermission && (
+              <div className="mt-2 flex justify-center items-center space-x-2">
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <span className="text-green-400 text-sm">Microphone ready</span>
+              </div>
+            )}
           </div>
 
           {/* Transcript and Response */}
@@ -211,14 +258,20 @@ const VoiceAIAssistant: React.FC<VoiceAIAssistantProps> = ({ isOpen, onClose }) 
             <div className="space-y-4">
               {transcript && (
                 <div className="bg-blue-600/20 border border-blue-500/30 rounded-xl p-4">
-                  <h4 className="text-blue-300 font-semibold mb-2">You said:</h4>
+                  <h4 className="text-blue-300 font-semibold mb-2 flex items-center">
+                    <Mic className="h-4 w-4 mr-2" />
+                    You said:
+                  </h4>
                   <p className="text-white">{transcript}</p>
                 </div>
               )}
               
               {response && (
                 <div className="bg-green-600/20 border border-green-500/30 rounded-xl p-4">
-                  <h4 className="text-green-300 font-semibold mb-2">AI Response:</h4>
+                  <h4 className="text-green-300 font-semibold mb-2 flex items-center">
+                    <Volume2 className="h-4 w-4 mr-2" />
+                    AI Response:
+                  </h4>
                   <p className="text-white">{response}</p>
                 </div>
               )}
@@ -231,6 +284,7 @@ const VoiceAIAssistant: React.FC<VoiceAIAssistantProps> = ({ isOpen, onClose }) 
               <button
                 onClick={stopSpeaking}
                 className="bg-red-600 hover:bg-red-700 p-3 rounded-full transition-all"
+                title="Stop speaking"
               >
                 <VolumeX className="h-5 w-5 text-white" />
               </button>
@@ -243,7 +297,7 @@ const VoiceAIAssistant: React.FC<VoiceAIAssistantProps> = ({ isOpen, onClose }) 
               Clear
             </button>
 
-            <button className="bg-gray-700 hover:bg-gray-600 p-2 rounded-lg transition-all">
+            <button className="bg-gray-700 hover:bg-gray-600 p-2 rounded-lg transition-all" title="Settings">
               <Settings className="h-5 w-5 text-white" />
             </button>
           </div>
@@ -252,6 +306,7 @@ const VoiceAIAssistant: React.FC<VoiceAIAssistantProps> = ({ isOpen, onClose }) 
           <div className="bg-gray-800/50 rounded-xl p-4">
             <h4 className="text-white font-semibold mb-2">How to use:</h4>
             <ul className="text-gray-300 text-sm space-y-1">
+              <li>• Grant microphone access when prompted</li>
               <li>• Tap the microphone to start speaking</li>
               <li>• Wait for the AI to process and respond</li>
               <li>• The response will be spoken aloud automatically</li>

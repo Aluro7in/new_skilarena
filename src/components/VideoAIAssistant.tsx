@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Video, VideoOff, Mic, MicOff, Phone, PhoneOff, Settings, Users } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Video, VideoOff, Mic, MicOff, Phone, PhoneOff, Settings, Users, Camera, AlertCircle, Loader } from 'lucide-react';
 import { tavusService } from '../services/tavus';
 
 interface TavusReplica {
@@ -24,12 +24,48 @@ const VideoAIAssistant: React.FC<VideoAIAssistantProps> = ({ isOpen, onClose }) 
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [hasPermissions, setHasPermissions] = useState(false);
+  const [permissionError, setPermissionError] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
     if (isOpen) {
       loadReplicas();
+      requestPermissions();
     }
+    
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+    };
   }, [isOpen]);
+
+  const requestPermissions = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: true, 
+        audio: true 
+      });
+      
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+      
+      setHasPermissions(true);
+      setPermissionError(null);
+    } catch (error: any) {
+      console.error('Error accessing camera/microphone:', error);
+      setPermissionError(
+        error.name === 'NotAllowedError' 
+          ? 'Camera and microphone access denied. Please allow access to use video AI features.'
+          : 'Unable to access camera or microphone. Please check your device settings.'
+      );
+      setHasPermissions(false);
+    }
+  };
 
   const loadReplicas = async () => {
     setLoading(true);
@@ -57,8 +93,8 @@ const VideoAIAssistant: React.FC<VideoAIAssistantProps> = ({ isOpen, onClose }) 
         });
         setConversationUrl(conversation.conversation_url);
       } else {
-        // Demo mode
-        setConversationUrl(tavusService.getDemoConversationUrl());
+        // Demo mode with simulated video
+        setConversationUrl('demo-mode');
       }
       setIsConnected(true);
     } catch (error) {
@@ -78,17 +114,29 @@ const VideoAIAssistant: React.FC<VideoAIAssistantProps> = ({ isOpen, onClose }) 
 
   const toggleMute = () => {
     setIsMuted(!isMuted);
+    if (streamRef.current) {
+      const audioTracks = streamRef.current.getAudioTracks();
+      audioTracks.forEach(track => {
+        track.enabled = isMuted;
+      });
+    }
   };
 
   const toggleVideo = () => {
     setIsVideoEnabled(!isVideoEnabled);
+    if (streamRef.current) {
+      const videoTracks = streamRef.current.getVideoTracks();
+      videoTracks.forEach(track => {
+        track.enabled = !isVideoEnabled;
+      });
+    }
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
-      <div className="bg-gray-900 rounded-2xl p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-gray-900 rounded-2xl p-6 max-w-5xl w-full max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-3">
             <div className="bg-gradient-to-r from-purple-500 to-blue-500 p-2 rounded-xl">
@@ -109,6 +157,22 @@ const VideoAIAssistant: React.FC<VideoAIAssistantProps> = ({ isOpen, onClose }) 
           </button>
         </div>
 
+        {/* Permission Error */}
+        {permissionError && (
+          <div className="mb-6 bg-red-600/20 border border-red-500/30 rounded-xl p-4">
+            <div className="flex items-center space-x-2">
+              <AlertCircle className="h-5 w-5 text-red-400" />
+              <p className="text-red-300 text-sm">{permissionError}</p>
+            </div>
+            <button
+              onClick={requestPermissions}
+              className="mt-3 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        )}
+
         {!isConnected ? (
           // Pre-call setup
           <div className="space-y-6">
@@ -116,7 +180,7 @@ const VideoAIAssistant: React.FC<VideoAIAssistantProps> = ({ isOpen, onClose }) 
               <h3 className="text-lg font-semibold text-white mb-4">Choose Your AI Assistant</h3>
               {loading ? (
                 <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
+                  <Loader className="animate-spin h-8 w-8 text-purple-500" />
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -145,6 +209,25 @@ const VideoAIAssistant: React.FC<VideoAIAssistantProps> = ({ isOpen, onClose }) 
               )}
             </div>
 
+            {/* Camera Preview */}
+            {hasPermissions && (
+              <div className="bg-gray-800 rounded-xl p-4">
+                <h3 className="text-lg font-semibold text-white mb-3">Your Camera Preview</h3>
+                <div className="relative bg-gray-900 rounded-lg overflow-hidden aspect-video">
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    muted
+                    playsInline
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute top-2 right-2">
+                    <div className="bg-green-500 w-3 h-3 rounded-full animate-pulse"></div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {!tavusService.isApiConfigured() && (
               <div className="bg-yellow-600/20 border border-yellow-500/30 rounded-xl p-4">
                 <p className="text-yellow-200 text-sm">
@@ -156,18 +239,18 @@ const VideoAIAssistant: React.FC<VideoAIAssistantProps> = ({ isOpen, onClose }) 
             <div className="flex justify-center">
               <button
                 onClick={startVideoConversation}
-                disabled={!selectedReplica || isConnecting}
+                disabled={!selectedReplica || isConnecting || !hasPermissions}
                 className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-green-700 hover:to-emerald-700 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center space-x-3"
               >
                 {isConnecting ? (
                   <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    <Loader className="animate-spin h-5 w-5" />
                     <span>Connecting...</span>
                   </>
                 ) : (
                   <>
                     <Phone className="h-5 w-5" />
-                    <span>Start Video Call</span>
+                    <span>Start Video Call with AI</span>
                   </>
                 )}
               </button>
@@ -176,26 +259,70 @@ const VideoAIAssistant: React.FC<VideoAIAssistantProps> = ({ isOpen, onClose }) 
         ) : (
           // Active video call
           <div className="space-y-4">
-            <div className="bg-gray-800 rounded-xl aspect-video flex items-center justify-center">
-              {conversationUrl && tavusService.isApiConfigured() ? (
-                <iframe
-                  src={conversationUrl}
-                  className="w-full h-full rounded-xl"
-                  allow="microphone; camera"
-                  title="Tavus AI Video Conversation"
-                />
-              ) : (
-                <div className="text-center">
-                  <Video className="h-16 w-16 text-gray-500 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-white mb-2">Demo Video Call</h3>
-                  <p className="text-gray-400">
-                    In a real implementation, this would show your Tavus AI video conversation.
-                  </p>
-                  <p className="text-sm text-gray-500 mt-2">
-                    Add your Tavus API key to enable live video AI interactions.
-                  </p>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {/* AI Video */}
+              <div className="bg-gray-800 rounded-xl aspect-video flex items-center justify-center relative">
+                {conversationUrl && tavusService.isApiConfigured() && conversationUrl !== 'demo-mode' ? (
+                  <iframe
+                    src={conversationUrl}
+                    className="w-full h-full rounded-xl"
+                    allow="microphone; camera"
+                    title="Tavus AI Video Conversation"
+                  />
+                ) : (
+                  <div className="text-center p-8">
+                    <div className="w-20 h-20 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+                      <Users className="h-10 w-10 text-white" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-white mb-2">{selectedReplica?.replica_name}</h3>
+                    <p className="text-gray-400 text-sm">
+                      {tavusService.isApiConfigured() 
+                        ? 'AI Assistant is ready to chat!'
+                        : 'Demo AI Assistant - Add Tavus API key for real video conversations'
+                      }
+                    </p>
+                    <div className="mt-4 flex justify-center">
+                      <div className="flex space-x-2">
+                        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <div className="absolute top-3 left-3 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-semibold">
+                  AI Assistant
                 </div>
-              )}
+              </div>
+
+              {/* User Video */}
+              <div className="bg-gray-800 rounded-xl aspect-video flex items-center justify-center relative">
+                {hasPermissions ? (
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    muted
+                    playsInline
+                    className={`w-full h-full object-cover rounded-xl ${!isVideoEnabled ? 'opacity-0' : ''}`}
+                  />
+                ) : (
+                  <div className="text-center p-8">
+                    <Camera className="h-16 w-16 text-gray-500 mx-auto mb-4" />
+                    <p className="text-gray-400">Camera access needed</p>
+                  </div>
+                )}
+                {!isVideoEnabled && (
+                  <div className="absolute inset-0 bg-gray-900 rounded-xl flex items-center justify-center">
+                    <VideoOff className="h-12 w-12 text-gray-400" />
+                  </div>
+                )}
+                <div className="absolute top-3 left-3 bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-semibold">
+                  You
+                </div>
+                <div className="absolute top-3 right-3">
+                  <div className={`w-3 h-3 rounded-full ${hasPermissions ? 'bg-green-500' : 'bg-red-500'} animate-pulse`}></div>
+                </div>
+              </div>
             </div>
 
             {/* Call Controls */}
@@ -205,6 +332,7 @@ const VideoAIAssistant: React.FC<VideoAIAssistantProps> = ({ isOpen, onClose }) 
                 className={`p-3 rounded-full transition-all ${
                   isMuted ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-700 hover:bg-gray-600'
                 }`}
+                title={isMuted ? 'Unmute' : 'Mute'}
               >
                 {isMuted ? <MicOff className="h-5 w-5 text-white" /> : <Mic className="h-5 w-5 text-white" />}
               </button>
@@ -214,6 +342,7 @@ const VideoAIAssistant: React.FC<VideoAIAssistantProps> = ({ isOpen, onClose }) 
                 className={`p-3 rounded-full transition-all ${
                   !isVideoEnabled ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-700 hover:bg-gray-600'
                 }`}
+                title={isVideoEnabled ? 'Turn off camera' : 'Turn on camera'}
               >
                 {isVideoEnabled ? <Video className="h-5 w-5 text-white" /> : <VideoOff className="h-5 w-5 text-white" />}
               </button>
@@ -221,19 +350,24 @@ const VideoAIAssistant: React.FC<VideoAIAssistantProps> = ({ isOpen, onClose }) 
               <button
                 onClick={endVideoConversation}
                 className="bg-red-600 hover:bg-red-700 p-3 rounded-full transition-all"
+                title="End call"
               >
                 <PhoneOff className="h-5 w-5 text-white" />
               </button>
 
-              <button className="bg-gray-700 hover:bg-gray-600 p-3 rounded-full transition-all">
+              <button className="bg-gray-700 hover:bg-gray-600 p-3 rounded-full transition-all" title="Settings">
                 <Settings className="h-5 w-5 text-white" />
               </button>
             </div>
 
             {/* Call Info */}
-            <div className="text-center">
-              <p className="text-white font-semibold">{selectedReplica?.replica_name}</p>
-              <p className="text-gray-400 text-sm">Video call in progress</p>
+            <div className="text-center bg-gray-800/50 rounded-xl p-4">
+              <p className="text-white font-semibold text-lg">{selectedReplica?.replica_name}</p>
+              <p className="text-gray-400 text-sm">Video conversation in progress</p>
+              <div className="flex justify-center items-center space-x-2 mt-2">
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <span className="text-green-400 text-sm">Connected</span>
+              </div>
             </div>
           </div>
         )}
