@@ -44,13 +44,38 @@ window.addEventListener('offline', function() {
 
 // Check if application is running in demo mode
 const isDemoMode = 
-  !import.meta.env.VITE_SUPABASE_URL || 
-  !import.meta.env.VITE_SUPABASE_ANON_KEY ||
-  import.meta.env.VITE_SUPABASE_URL.includes('your_') ||
-  import.meta.env.VITE_SUPABASE_ANON_KEY.includes('your_');
+  import.meta.env.VITE_FORCE_DEMO_MODE === 'true' ||
+  (
+    (!import.meta.env.VITE_SUPABASE_URL || 
+    !import.meta.env.VITE_SUPABASE_ANON_KEY ||
+    import.meta.env.VITE_SUPABASE_URL.includes('your_') ||
+    import.meta.env.VITE_SUPABASE_ANON_KEY.includes('your_'))
+  );
 
 if (isDemoMode) {
   console.info('Application running in demo mode. Some features may be limited.');
+}
+
+// Add network status monitoring
+let lastOnlineStatus = navigator.onLine;
+
+function handleNetworkStatusChange() {
+  if (navigator.onLine !== lastOnlineStatus) {
+    lastOnlineStatus = navigator.onLine;
+    if (navigator.onLine) {
+      console.info('Application is back online');
+    } else {
+      console.warn('Application is offline');
+    }
+  }
+}
+
+// Poll connectivity status (some browsers don't reliably fire online/offline events)
+setInterval(handleNetworkStatusChange, 5000);
+
+// Initial connectivity check
+if (!navigator.onLine) {
+  console.warn('Starting application in offline mode');
 }
 
 createRoot(document.getElementById('root')!).render(

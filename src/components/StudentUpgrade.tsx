@@ -27,6 +27,13 @@ const StudentUpgrade: React.FC = () => {
   const handleSubscription = async (tier: any) => {
     setLoading(tier.id);
     setError(null);
+    
+    // Check for network connectivity
+    if (!navigator.onLine) {
+      setError('You appear to be offline. Please check your internet connection and try again.');
+      setLoading(null);
+      return;
+    }
 
     try {
       const priceId = billingPeriod === 'yearly' ? tier.stripeYearlyPriceId : tier.stripeMonthlyPriceId;
@@ -34,7 +41,20 @@ const StudentUpgrade: React.FC = () => {
         await stripeService.purchaseProduct(priceId, 'subscription');
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to start checkout process');
+      // Handle different types of errors with specific messages
+      if (!navigator.onLine || err.message?.includes('offline')) {
+        setError('You appear to be offline. Please check your internet connection and try again.');
+      } 
+      else if (err.message?.includes('not configured') || err.message?.includes('Stripe')) {
+        setError('Payment system is not properly configured. Please try again later or contact support.');
+      } 
+      else if (err.message?.includes('fetch') || err.message?.includes('network')) {
+        setError('Network error. Unable to connect to payment service. Please check your connection and try again.');
+      } 
+      else {
+        setError(err.message || 'Failed to start checkout process');
+      }
+      
       console.error('Subscription error:', err);
     } finally {
       setLoading(null);

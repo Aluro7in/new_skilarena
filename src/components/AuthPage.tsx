@@ -12,15 +12,18 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
   const [showTrial, setShowTrial] = useState(false);
   const [trialAttempts, setTrialAttempts] = useState(0);
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
+    firstName: localStorage.getItem('savedFirstName') || '',
+    lastName: localStorage.getItem('savedLastName') || '',
+    email: localStorage.getItem('savedEmail') || '',
     password: '',
     confirmPassword: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [networkStatus, setNetworkStatus] = useState<'online' | 'offline'>(
+    navigator.onLine ? 'online' : 'offline'
+  );
 
   useEffect(() => {
     // Check trial session
@@ -38,6 +41,23 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
     checkExistingSession();
   }, []);
 
+  // Monitor network status
+  useEffect(() => {
+    const handleOnline = () => setNetworkStatus('online');
+    const handleOffline = () => {
+      setNetworkStatus('offline');
+      setError('You are currently offline. Some features may not work properly.');
+    };
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
   const checkExistingSession = async () => {
     try {
       const session = await supabaseService.getSession();
@@ -50,6 +70,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
     } catch (error) {
       console.error('Session check error:', error);
     }
+    setIsLoading(false);
   };
 
   const validateForm = () => {
@@ -110,7 +131,23 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
 
     setIsLoading(true);
 
+    // Save non-sensitive form data for convenience (excluding password)
+    if (!isLogin) {
+      localStorage.setItem('savedFirstName', formData.firstName.trim());
+      localStorage.setItem('savedLastName', formData.lastName.trim());
+    }
+    localStorage.setItem('savedEmail', formData.email.trim());
+
     try {
+      if (networkStatus === 'offline') {
+        // Special handling for offline mode
+        setTimeout(() => {
+          setError('Cannot sign in while offline. Please check your internet connection and try again.');
+          setIsLoading(false);
+        }, 1500);
+        return;
+      }
+
       if (isLogin) {
         const { user } = await supabaseService.signIn(formData.email.trim(), formData.password);
         if (user) {
@@ -118,6 +155,8 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
             name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
             email: user.email || ''
           });
+          localStorage.removeItem('savedFirstName');
+          localStorage.removeItem('savedLastName');
         }
       } else {
         const fullName = `${formData.firstName.trim()} ${formData.lastName.trim()}`;
@@ -134,6 +173,8 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
               name: fullName || user.email?.split('@')[0] || 'User',
               email: user.email || ''
             });
+            localStorage.removeItem('savedFirstName');
+            localStorage.removeItem('savedLastName');
           } else {
             // Email confirmation required
             setMessage('Please check your email and click the confirmation link to complete your registration.');
@@ -144,6 +185,16 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
       }
     } catch (err: any) {
       console.error('Auth error:', err);
+      
+      // Network connectivity check
+      if (!navigator.onLine || err.message?.includes('offline') || err.message?.includes('fetch')) {
+        setError('Network connection issue. Please check your internet connection and try again.');
+      }
+      // API server unreachable
+      else if (err.message?.includes('CORS') || err.message?.includes('Failed to')) {
+        setError('Unable to reach authentication server. Please try again later or contact support.');
+      }
+      // Other errors
       // Provide more user-friendly error messages
       if (err.message?.includes('fetch') || !navigator.onLine) {
         setError('Network connection error. Please check your internet connection and try again.');
@@ -174,6 +225,11 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
     });
   };
 
+  const handleDemoLogin = () => {
+    onLogin({ name: 'Demo User', email: 'demo@example.com' });
+  };
+
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
@@ -194,6 +250,15 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
 
   const canUseTrial = trialAttempts < 3;
 
+  // Show network status indicator
+  const isOffline = networkStatus === 'offline';
+
+  if (isLoading && !formData.email) {
+    return <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+      <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+    </div>
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden flex items-center justify-center">
       {/* Animated Background */}
@@ -208,6 +273,16 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
       </div>
 
       <div className="relative z-10 w-full max-w-6xl mx-auto px-4">
+        {/* Network Status Indicator */}
+        {isOffline && (
+          <div className="fixed top-4 right-4 bg-red-600/90 text-white py-2 px-4 rounded-lg flex items-center shadow-lg animate-pulse z-50">
+            <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636a9 9 0 010 12.728m-6.364 0a3 3 0 000-4.243m0-6.364a3 3 0 00-4.243 4.243m4.242-4.242L18.364 5.636" />
+            </svg>
+            <span className="text-sm font-medium">Offline Mode</span>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Left Side - Branding & Info */}
           <div className="text-center lg:text-left">
@@ -274,7 +349,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
             </div>
           </div>
 
-          {/* Right Side - Auth Form */}
+          {/* Right Side - Auth Form or Network Error */}
           <div className="flex justify-center">
             <div className="w-full max-w-md">
               <div className="bg-black/20 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl">
@@ -290,7 +365,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
                 {/* Error/Success Messages */}
                 {error && (
                   <div className="mb-6 bg-red-600/20 border border-red-500/30 rounded-xl p-4">
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-start space-x-2">
                       <AlertCircle className="h-5 w-5 text-red-400 flex-shrink-0" />
                       <p className="text-red-300 text-sm">{error}</p>
                     </div>
@@ -450,13 +525,30 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
                   </button>
                 </form>
 
+                {isOffline && (
+                  <div className="mt-6 mb-6 bg-yellow-600/20 border border-yellow-500/30 rounded-xl p-4 text-center">
+                    <p className="text-yellow-300 text-sm mb-3">
+                      You appear to be offline. Authentication requires an internet connection.
+                    </p>
+                    <button
+                      onClick={handleDemoLogin}
+                      className="bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-yellow-700 transition-colors"
+                    >
+                      Continue in Demo Mode
+                    </button>
+                  </div>
+                )}
+
                 <div className="mt-8 text-center">
                   <p className="text-gray-400">
                     {isLogin ? "Don't have an account?" : "Already have an account?"}
                     <button
                       onClick={() => {
+                        // Reset form when switching modes
                         setIsLogin(!isLogin);
-                        setError(null);
+                        setError(isOffline ? "You're currently offline. Some features may be limited." : null);
+                        // Keep the email when switching modes
+                        const email = formData.email;
                         setMessage(null);
                         setFormData({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '' });
                       }}

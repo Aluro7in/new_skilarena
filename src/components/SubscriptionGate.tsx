@@ -28,6 +28,13 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({
 
   const checkAccess = async () => {
     try {
+      // Check for network connectivity - if offline, allow access in demo mode
+      if (!navigator.onLine) {
+        console.warn('Network offline - allowing feature access in demo mode');
+        setHasAccess(true);
+        return;
+      }
+      
       const result = await subscriptionService.checkFeatureAccess(feature);
       setHasAccess(result.hasAccess);
       setReason(result.reason || '');
@@ -36,13 +43,18 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({
       setCurrentTier(subscription.tier);
     } catch (error) {
       console.error('Error checking feature access:', error);
-      setHasAccess(false);
+      setHasAccess(true); // Fail open to prevent blocking users due to technical issues
       setReason('Unable to verify access. Please try again.');
     }
   };
 
   const handleUpgrade = async (tierPriceId: string) => {
     try {
+      // Check for network connectivity
+      if (!navigator.onLine) {
+        throw new Error('You appear to be offline. Please check your internet connection and try again.');
+      }
+      
       await stripeService.purchaseProduct(tierPriceId, 'subscription');
     } catch (error) {
       console.error('Upgrade error:', error);

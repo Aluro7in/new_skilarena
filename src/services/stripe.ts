@@ -2,18 +2,42 @@ import { loadStripe } from '@stripe/stripe-js';
 import { supabase } from './supabase';
 import { stripeProducts, type StripeProduct } from '../stripe-config';
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+const isStripeConfigured = !!stripePublishableKey && 
+                          !stripePublishableKey.includes('your_') && 
+                          !stripePublishableKey.includes('pk_test_placeholder');
+
+// Only attempt to load Stripe if we have a valid key
+const stripePromise = isStripeConfigured 
+  ? loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
+  : Promise.resolve(null);
 
 export class StripeService {
   private stripe: any = null;
+  private isConfigured: boolean = isStripeConfigured;
 
   async initialize() {
-    this.stripe = await stripePromise;
+    try {
+      this.stripe = await stripePromise;
+    } catch (error) {
+      console.error('Failed to initialize Stripe:', error);
+      this.isConfigured = false;
+    }
     return this.stripe;
   }
 
   async createCheckoutSession(priceId: string, mode: 'subscription' | 'payment' = 'subscription') {
     try {
+      // Check if Stripe is properly configured
+      if (!this.isConfigured) {
+        throw new Error('Stripe is not configured. Please add a valid Stripe publishable key to your environment variables.');
+      }
+
+      // Check if we're online
+      if (!navigator.onLine) {
+        throw new Error('You appear to be offline. Please check your internet connection and try again.');
+      }
+
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError || !session?.access_token) {
@@ -57,6 +81,11 @@ export class StripeService {
   }
 
   async redirectToCheckout(sessionId: string) {
+    // Check if Stripe is properly configured
+    if (!this.isConfigured) {
+      throw new Error('Stripe is not configured. Please add a valid Stripe publishable key to your environment variables.');
+    }
+    
     if (!this.stripe) {
       await this.initialize();
     }
@@ -73,6 +102,12 @@ export class StripeService {
 
   async purchaseProduct(priceId: string, mode: 'subscription' | 'payment' = 'subscription') {
     try {
+      // Check if Stripe is properly configured
+      if (!this.isConfigured) {
+        console.warn('Stripe is not configured. Running in demo mode.');
+        return;
+      }
+      
       const session = await this.createCheckoutSession(priceId, mode);
       await this.redirectToCheckout(session.sessionId);
     } catch (error) {
@@ -91,6 +126,10 @@ export class StripeService {
 
   getProductById(id: string): StripeProduct | undefined {
     return stripeProducts.find(product => product.id === id);
+  }
+  
+  isStripeConfigured(): boolean {
+    return this.isConfigured;
   }
 }
 
