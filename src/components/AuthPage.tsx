@@ -4,6 +4,7 @@ import { supabaseService } from '../services/supabase';
 
 interface AuthPageProps {
   onLogin: (user: { name: string; email: string }) => void;
+  onShowTroubleshooter: () => void;
 }
 
 const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
