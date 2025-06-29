@@ -1,12 +1,13 @@
 import React from 'react';
-import { Trophy, Flame, Target, TrendingUp, Star, Zap, GraduationCap, TestTube, Gamepad2, Play, ArrowRight, Crown, Sparkles } from 'lucide-react';
+import { Trophy, Flame, Target, TrendingUp, Star, Zap, GraduationCap, TestTube, Gamepad2, Play, ArrowRight, Crown, Sparkles, Video, Mic, Globe, CheckCircle, ExternalLink } from 'lucide-react';
 import { currentUser, skills, challenges, tutorials, gameTests } from '../data/mockData';
 
 interface DashboardProps {
   onTabChange: (tab: string) => void;
+  onAIToggle?: () => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
+const Dashboard: React.FC<DashboardProps> = ({ onTabChange, onAIToggle = () => {} }) => {
   const completedSkills = skills.filter(skill => skill.completed);
   const inProgressSkills = skills.filter(skill => skill.progress > 0 && !skill.completed);
   const activeChallenges = challenges.filter(challenge => challenge.status === 'active');
@@ -237,6 +238,167 @@ const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
           </div>
         </div>
       )}
+
+      {/* Challenge Completion Showcase */}
+      <div className="bg-gradient-to-r from-purple-600/10 via-blue-600/10 to-green-600/10 backdrop-blur-xl border border-white/10 rounded-3xl p-8">
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-purple-600/20 to-blue-600/20 backdrop-blur-sm border border-white/10 rounded-full px-6 py-2 mb-4">
+            <Sparkles className="h-5 w-5 text-purple-400" />
+            <span className="text-purple-300 font-semibold">Challenge Completed</span>
+          </div>
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-blue-400 to-green-400 bg-clip-text text-transparent mb-4">
+            AI-Powered Platform Integration
+          </h2>
+          <p className="text-gray-300 max-w-2xl mx-auto">
+            Successfully integrated cutting-edge AI technologies and deployed a production-ready gamified learning platform
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+          {/* Video AI Challenge */}
+          <div className="bg-black/20 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:bg-black/30 transition-all group">
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-gradient-to-r from-purple-500 to-blue-500 p-3 rounded-xl group-hover:scale-110 transition-transform">
+                <Video className="h-8 w-8 text-white" />
+              </div>
+              <CheckCircle className="h-6 w-6 text-green-400" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">Conversational AI Video</h3>
+            <p className="text-gray-400 text-sm mb-4">
+              Real-time AI video agents powered by Tavus for immersive learning experiences
+            </p>
+            <div className="space-y-2 text-xs text-gray-300">
+              <div className="flex items-center space-x-2">
+                <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
+                <span>Real-time video conversations</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
+                <span>Multiple AI avatar personalities</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
+                <span>Interactive video call controls</span>
+              </div>
+            </div>
+            <button 
+              onClick={onAIToggle}
+              className="w-full mt-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white py-2 px-4 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all transform hover:scale-105 flex items-center justify-center space-x-2"
+            >
+              <Video className="h-4 w-4" />
+              <span>Try Video AI</span>
+            </button>
+          </div>
+
+          {/* Voice AI Challenge */}
+          <div className="bg-black/20 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:bg-black/30 transition-all group">
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-3 rounded-xl group-hover:scale-110 transition-transform">
+                <Mic className="h-8 w-8 text-white" />
+              </div>
+              <CheckCircle className="h-6 w-6 text-green-400" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">Voice AI Integration</h3>
+            <p className="text-gray-400 text-sm mb-4">
+              Natural voice conversations with ElevenLabs premium voice synthesis
+            </p>
+            <div className="space-y-2 text-xs text-gray-300">
+              <div className="flex items-center space-x-2">
+                <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
+                <span>High-quality text-to-speech</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
+                <span>Speech recognition & processing</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
+                <span>Multiple AI voice personalities</span>
+              </div>
+            </div>
+            <button 
+              onClick={onAIToggle}
+              className="w-full mt-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white py-2 px-4 rounded-lg font-semibold hover:from-green-700 hover:to-emerald-700 transition-all transform hover:scale-105 flex items-center justify-center space-x-2"
+            >
+              <Mic className="h-4 w-4" />
+              <span>Try Voice AI</span>
+            </button>
+          </div>
+
+          {/* Deploy Challenge */}
+          <div className="bg-black/20 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:bg-black/30 transition-all group">
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-gradient-to-r from-blue-500 to-cyan-500 p-3 rounded-xl group-hover:scale-110 transition-transform">
+                <Globe className="h-8 w-8 text-white" />
+              </div>
+              <CheckCircle className="h-6 w-6 text-green-400" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">Production Deployment</h3>
+            <p className="text-gray-400 text-sm mb-4">
+              Full-stack application deployed on Netlify with optimized performance
+            </p>
+            <div className="space-y-2 text-xs text-gray-300">
+              <div className="flex items-center space-x-2">
+                <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
+                <span>Automatic CI/CD deployment</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
+                <span>CDN optimization & caching</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
+                <span>Environment management</span>
+              </div>
+            </div>
+            <a 
+              href="https://eclectic-pika-b64cd3.netlify.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full mt-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-2 px-4 rounded-lg font-semibold hover:from-blue-700 hover:to-cyan-700 transition-all transform hover:scale-105 flex items-center justify-center space-x-2"
+            >
+              <Globe className="h-4 w-4" />
+              <span>View Live Site</span>
+              <ExternalLink className="h-3 w-3" />
+            </a>
+          </div>
+        </div>
+
+        {/* Technical Achievements */}
+        <div className="bg-black/30 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+          <h3 className="text-xl font-bold text-white mb-6 text-center">🏆 Technical Achievements Unlocked</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="text-center">
+              <div className="bg-purple-600/20 rounded-full p-3 w-fit mx-auto mb-2">
+                <Video className="h-6 w-6 text-purple-400" />
+              </div>
+              <div className="text-sm font-semibold text-white">Tavus Integration</div>
+              <div className="text-xs text-gray-400">Real-time Video AI</div>
+            </div>
+            <div className="text-center">
+              <div className="bg-green-600/20 rounded-full p-3 w-fit mx-auto mb-2">
+                <Mic className="h-6 w-6 text-green-400" />
+              </div>
+              <div className="text-sm font-semibold text-white">ElevenLabs API</div>
+              <div className="text-xs text-gray-400">Voice Synthesis</div>
+            </div>
+            <div className="text-center">
+              <div className="bg-blue-600/20 rounded-full p-3 w-fit mx-auto mb-2">
+                <Globe className="h-6 w-6 text-blue-400" />
+              </div>
+              <div className="text-sm font-semibold text-white">Netlify Deploy</div>
+              <div className="text-xs text-gray-400">Production Ready</div>
+            </div>
+            <div className="text-center">
+              <div className="bg-yellow-600/20 rounded-full p-3 w-fit mx-auto mb-2">
+                <Sparkles className="h-6 w-6 text-yellow-400" />
+              </div>
+              <div className="text-sm font-semibold text-white">Multi-Modal AI</div>
+              <div className="text-xs text-gray-400">Text, Voice, Video</div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Enhanced Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
