@@ -277,6 +277,11 @@ export default function App() {
     return renderContent();
   }
 
+  // Show auth page when no user is authenticated
+  if (!user) {
+    return <AuthPage onLogin={handleLogin} />;
+  }
+
   if (error) {
     return <ErrorFallback />;
   }
