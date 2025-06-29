@@ -5,6 +5,9 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5.3-blue.svg)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-5.4.2-purple.svg)](https://vitejs.dev/)
 [![Supabase](https://img.shields.io/badge/Supabase-2.39.0-green.svg)](https://supabase.com/)
+[![Netlify](https://img.shields.io/badge/Deploy-Netlify-blue.svg)](https://netlify.com/)
+[![Tavus](https://img.shields.io/badge/Video%20AI-Tavus-red.svg)](https://tavus.com/)
+[![ElevenLabs](https://img.shields.io/badge/Voice%20AI-ElevenLabs-purple.svg)](https://elevenlabs.io/)
 
 ## 🎮 Project Description
 
@@ -22,6 +25,12 @@ To create the world's most engaging and effective platform for learning game dev
 - **AI-Powered Assistant**: 24/7 AI support for learning guidance and problem-solving
 - **Progress Tracking**: Detailed analytics and progress visualization
 - **Gamification**: XP system, badges, achievements, and leaderboards
+
+### 🤖 Advanced AI Features
+- **Text AI Assistant**: ChatGPT-powered learning assistant for instant help
+- **Video AI Conversations**: Real-time AI video agents powered by Tavus
+- **Voice AI Interactions**: Natural voice conversations with ElevenLabs
+- **Multi-modal Learning**: Text, voice, and video AI assistance
 
 ### 🎮 Game Testing Platform
 - **Professional Testing**: 100+ game testing methods and scenarios
@@ -67,14 +76,21 @@ To create the world's most engaging and effective platform for learning game dev
 - **Stripe Checkout** - Secure payment flows
 - **Stripe Webhooks** - Real-time payment event handling
 
+### AI & Machine Learning
+- **OpenAI Integration** - ChatGPT-powered learning assistant
+- **Tavus API** - Real-time AI video conversations
+- **ElevenLabs API** - Premium voice synthesis and recognition
+- **Natural Language Processing** - Intelligent content understanding
+
+### Deployment & Infrastructure
+- **Netlify** - Automatic deployments and CDN
+- **Edge Functions** - Serverless backend processing
+- **Environment Management** - Secure configuration handling
+
 ### Development Tools
 - **ESLint** - Code linting and quality assurance
 - **PostCSS & Autoprefixer** - CSS processing and vendor prefixes
 - **GitHub Actions** - CI/CD pipeline (when configured)
-
-### AI & Machine Learning
-- **OpenAI Integration** - AI-powered learning assistant
-- **Natural Language Processing** - Intelligent content understanding
 
 ## 📋 Prerequisites
 
@@ -122,8 +138,10 @@ VITE_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
 STRIPE_SECRET_KEY=your_stripe_secret_key
 STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
 
-# OpenAI Configuration (Optional)
-OPENAI_API_KEY=your_openai_api_key
+# AI Configuration
+VITE_OPENAI_API_KEY=your_openai_api_key
+VITE_TAVUS_API_KEY=your_tavus_api_key
+VITE_ELEVENLABS_API_KEY=your_elevenlabs_api_key
 ```
 
 ### Step 4: Database Setup
@@ -137,14 +155,30 @@ npx supabase db push
 
 3. Set up Row Level Security policies (included in migrations)
 
-### Step 5: Stripe Configuration
+### Step 5: AI Services Setup
+
+#### OpenAI Setup
+1. Get your API key from [OpenAI Platform](https://platform.openai.com/api-keys)
+2. Add it to your `.env` file as `VITE_OPENAI_API_KEY`
+
+#### Tavus Setup (Video AI)
+1. Sign up at [Tavus](https://tavus.com/)
+2. Get your API key from the dashboard
+3. Add it to your `.env` file as `VITE_TAVUS_API_KEY`
+
+#### ElevenLabs Setup (Voice AI)
+1. Sign up at [ElevenLabs](https://elevenlabs.io/)
+2. Get your API key from the dashboard
+3. Add it to your `.env` file as `VITE_ELEVENLABS_API_KEY`
+
+### Step 6: Stripe Configuration
 
 1. Create a Stripe account at [stripe.com](https://stripe.com)
 2. Configure your products and pricing in the Stripe Dashboard
 3. Update the `stripe-config.ts` file with your product IDs
 4. Set up webhook endpoints for payment processing
 
-### Step 6: Start Development Server
+### Step 7: Start Development Server
 
 ```bash
 npm run dev
@@ -153,6 +187,45 @@ yarn dev
 ```
 
 Visit `http://localhost:5173` to see the application running.
+
+## 🚀 Deployment to Netlify
+
+### Automatic Deployment
+
+1. **Connect to Netlify**:
+   - Go to [Netlify](https://netlify.com/)
+   - Click "New site from Git"
+   - Connect your GitHub repository
+
+2. **Configure Build Settings**:
+   - Build command: `npm run build`
+   - Publish directory: `dist`
+   - Node version: `18`
+
+3. **Environment Variables**:
+   Add all your environment variables in Netlify dashboard:
+   - Site settings → Environment variables
+   - Add each variable from your `.env` file
+
+4. **Deploy**:
+   - Netlify will automatically deploy on every push to main branch
+   - Custom domain configuration available in settings
+
+### Manual Deployment
+
+```bash
+# Build the project
+npm run build
+
+# Install Netlify CLI
+npm install -g netlify-cli
+
+# Login to Netlify
+netlify login
+
+# Deploy
+netlify deploy --prod --dir=dist
+```
 
 ## 📖 Usage Instructions
 
@@ -163,6 +236,23 @@ Visit `http://localhost:5173` to see the application running.
 3. **Choose Learning Path**: Select skills, tutorials, or challenges based on your goals
 4. **Track Progress**: Monitor your XP, badges, and skill completion
 5. **Join Community**: Participate in forums and team collaboration
+
+### AI Features Usage
+
+#### Text AI Assistant
+- Click the AI assistant button in the bottom right
+- Type your questions or use voice commands
+- Get instant responses powered by ChatGPT
+
+#### Video AI Conversations
+- Click the video icon in the AI assistant header
+- Choose your preferred AI avatar
+- Start a real-time video conversation
+
+#### Voice AI Interactions
+- Click the microphone icon in the AI assistant header
+- Speak naturally to the AI
+- Hear responses in high-quality synthesized voice
 
 ### Code Examples
 
@@ -194,6 +284,26 @@ function SkillProgress() {
 }
 ```
 
+#### AI Services Integration
+
+```typescript
+import { openaiService } from './services/openai';
+import { tavusService } from './services/tavus';
+import { elevenLabsService } from './services/elevenlabs';
+
+// Text AI
+const response = await openaiService.generateResponse([
+  { role: 'user', content: 'How do I learn React?' }
+]);
+
+// Video AI
+const conversation = await tavusService.createConversation('replica-id');
+
+// Voice AI
+await elevenLabsService.textToSpeech('Hello, world!', 'voice-id');
+const transcript = await elevenLabsService.speechToText();
+```
+
 #### Subscription Management
 
 ```typescript
@@ -204,21 +314,6 @@ const hasAccess = await subscriptionService.checkFeatureAccess('premiumTutorials
 
 // Get current subscription
 const subscription = await subscriptionService.getCurrentUserSubscription();
-```
-
-#### Stripe Payment Integration
-
-```typescript
-import { stripeService } from './services/stripe';
-
-// Create checkout session
-const handlePurchase = async (priceId: string) => {
-  try {
-    await stripeService.purchaseProduct(priceId, 'subscription');
-  } catch (error) {
-    console.error('Payment failed:', error);
-  }
-};
 ```
 
 ## ⚙️ Configuration Details
@@ -232,7 +327,9 @@ const handlePurchase = async (priceId: string) => {
 | `VITE_STRIPE_PUBLISHABLE_KEY` | Stripe publishable key | Yes |
 | `STRIPE_SECRET_KEY` | Stripe secret key | Yes |
 | `STRIPE_WEBHOOK_SECRET` | Stripe webhook secret | Yes |
-| `OPENAI_API_KEY` | OpenAI API key for AI features | No |
+| `VITE_OPENAI_API_KEY` | OpenAI API key for text AI | No |
+| `VITE_TAVUS_API_KEY` | Tavus API key for video AI | No |
+| `VITE_ELEVENLABS_API_KEY` | ElevenLabs API key for voice AI | No |
 
 ### Subscription Tiers
 
@@ -273,6 +370,28 @@ Body: {
 POST /functions/v1/stripe-webhook
 Headers: stripe-signature: <signature>
 Body: <stripe_event_payload>
+```
+
+### AI Services APIs
+
+#### Tavus Video AI
+
+```typescript
+class TavusService {
+  async createConversation(replicaId: string): Promise<TavusConversationResponse>
+  async getReplicas(): Promise<TavusReplica[]>
+  async endConversation(conversationId: string): Promise<void>
+}
+```
+
+#### ElevenLabs Voice AI
+
+```typescript
+class ElevenLabsService {
+  async textToSpeech(text: string, voiceId?: string): Promise<void>
+  async speechToText(): Promise<string>
+  async getVoices(): Promise<Voice[]>
+}
 ```
 
 ### Frontend Services
@@ -335,6 +454,8 @@ class SubscriptionService {
 - **Browser Support**: Chrome 90+, Firefox 88+, Safari 14+, Edge 90+
 - **Memory**: 4GB RAM minimum, 8GB recommended
 - **Storage**: 1GB free space for development
+- **Microphone**: Required for voice AI features
+- **Camera**: Optional for video AI features
 
 ## 🤝 Contributing Guidelines
 
@@ -431,6 +552,13 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
 - **Stripe** - For secure and reliable payment processing
 - **Tailwind Labs** - For the utility-first CSS framework
 
+### AI Service Partners
+
+- **OpenAI** - For revolutionary AI language models
+- **Tavus** - For cutting-edge video AI technology
+- **ElevenLabs** - For premium voice synthesis and recognition
+- **Netlify** - For seamless deployment and hosting
+
 ### Contributors
 
 - All our amazing contributors who have helped shape this project
@@ -450,6 +578,9 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
 - [Supabase Guides](https://supabase.com/docs)
 - [Stripe Documentation](https://stripe.com/docs)
 - [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+- [Tavus API Documentation](https://docs.tavus.com/)
+- [ElevenLabs API Documentation](https://docs.elevenlabs.io/)
+- [Netlify Documentation](https://docs.netlify.com/)
 
 ---
 
@@ -458,5 +589,7 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
 **Built with ❤️ by the SkillArena Team**
 
 [Website](https://skillarena.com) • [Documentation](https://docs.skillarena.com) • [Community](https://discord.gg/skillarena) • [Twitter](https://twitter.com/skillarena)
+
+**Powered by**: OpenAI • Tavus • ElevenLabs • Netlify • Supabase • Stripe
 
 </div>

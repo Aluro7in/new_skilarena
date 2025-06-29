@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Bot, Send, X, MessageSquare, Minimize2, Maximize2, Sparkles, Zap, AlertCircle, Wifi, WifiOff } from 'lucide-react';
+import { Bot, Send, X, MessageSquare, Minimize2, Maximize2, Sparkles, Zap, AlertCircle, Wifi, WifiOff, Video, Mic } from 'lucide-react';
 import { openaiService, type AIMessage } from '../services/openai';
+import VideoAIAssistant from './VideoAIAssistant';
+import VoiceAIAssistant from './VoiceAIAssistant';
 
 interface Message {
   id: string;
@@ -19,8 +21,8 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ isOpen, onToggle }) => {
     {
       id: '1',
       content: openaiService.isApiConfigured() 
-        ? "Hi! I'm your AI learning assistant powered by ChatGPT. I can help you with game development, programming, career advice, or any questions about SkillArena. What would you like to know?"
-        : "Hi! I'm your AI learning assistant. I can help you with game development, programming, career advice, or any questions about SkillArena. What would you like to know?",
+        ? "Hi! I'm your AI learning assistant powered by ChatGPT. I can help you with game development, programming, career advice, or any questions about SkillArena. You can also try my video or voice modes for a more interactive experience! What would you like to know?"
+        : "Hi! I'm your AI learning assistant. I can help you with game development, programming, career advice, or any questions about SkillArena. You can also try my video or voice modes for a more interactive experience! What would you like to know?",
       role: 'assistant',
       timestamp: new Date()
     }
@@ -29,6 +31,8 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ isOpen, onToggle }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showVideoAI, setShowVideoAI] = useState(false);
+  const [showVoiceAI, setShowVoiceAI] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -114,8 +118,8 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ isOpen, onToggle }) => {
     setMessages([{
       id: '1',
       content: openaiService.isApiConfigured() 
-        ? "Hi! I'm your AI learning assistant powered by ChatGPT. I can help you with game development, programming, career advice, or any questions about SkillArena. What would you like to know?"
-        : "Hi! I'm your AI learning assistant. I can help you with game development, programming, career advice, or any questions about SkillArena. What would you like to know?",
+        ? "Hi! I'm your AI learning assistant powered by ChatGPT. I can help you with game development, programming, career advice, or any questions about SkillArena. You can also try my video or voice modes for a more interactive experience! What would you like to know?"
+        : "Hi! I'm your AI learning assistant. I can help you with game development, programming, career advice, or any questions about SkillArena. You can also try my video or voice modes for a more interactive experience! What would you like to know?",
       role: 'assistant',
       timestamp: new Date()
     }]);
@@ -148,167 +152,195 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ isOpen, onToggle }) => {
   }
 
   return (
-    <div className={`fixed bottom-6 right-6 z-50 bg-black/20 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl transition-all duration-300 flex flex-col ${
-      isMinimized ? 'w-80 h-16' : 'w-96 h-[600px]'
-    }`}>
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-white/10 flex-shrink-0">
-        <div className="flex items-center space-x-3">
-          <div className="bg-gradient-to-r from-purple-500 to-blue-500 p-2 rounded-xl">
-            <Bot className="h-5 w-5 text-white" />
-          </div>
-          <div>
-            <h3 className="text-white font-semibold">AI Assistant</h3>
-            <div className="flex items-center space-x-1">
-              <div className={`w-2 h-2 rounded-full animate-pulse ${
-                openaiService.isApiConfigured() ? 'bg-green-400' : 'bg-yellow-400'
-              }`}></div>
-              <span className="text-xs text-gray-400">
-                {openaiService.isApiConfigured() ? 'ChatGPT Powered' : 'Demo Mode'}
-              </span>
-              {openaiService.isApiConfigured() ? (
-                <Wifi className="h-3 w-3 text-green-400" />
-              ) : (
-                <WifiOff className="h-3 w-3 text-yellow-400" />
-              )}
+    <>
+      <div className={`fixed bottom-6 right-6 z-50 bg-black/20 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl transition-all duration-300 flex flex-col ${
+        isMinimized ? 'w-80 h-16' : 'w-96 h-[600px]'
+      }`}>
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b border-white/10 flex-shrink-0">
+          <div className="flex items-center space-x-3">
+            <div className="bg-gradient-to-r from-purple-500 to-blue-500 p-2 rounded-xl">
+              <Bot className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h3 className="text-white font-semibold">AI Assistant</h3>
+              <div className="flex items-center space-x-1">
+                <div className={`w-2 h-2 rounded-full animate-pulse ${
+                  openaiService.isApiConfigured() ? 'bg-green-400' : 'bg-yellow-400'
+                }`}></div>
+                <span className="text-xs text-gray-400">
+                  {openaiService.isApiConfigured() ? 'ChatGPT Powered' : 'Demo Mode'}
+                </span>
+                {openaiService.isApiConfigured() ? (
+                  <Wifi className="h-3 w-3 text-green-400" />
+                ) : (
+                  <WifiOff className="h-3 w-3 text-yellow-400" />
+                )}
+              </div>
             </div>
           </div>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setShowVideoAI(true)}
+              className="text-gray-400 hover:text-blue-400 transition-colors p-1 rounded-lg hover:bg-white/10"
+              title="Video AI"
+            >
+              <Video className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setShowVoiceAI(true)}
+              className="text-gray-400 hover:text-green-400 transition-colors p-1 rounded-lg hover:bg-white/10"
+              title="Voice AI"
+            >
+              <Mic className="h-4 w-4" />
+            </button>
+            <button
+              onClick={clearConversation}
+              className="text-gray-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10"
+              title="Clear conversation"
+            >
+              <MessageSquare className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setIsMinimized(!isMinimized)}
+              className="text-gray-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10"
+            >
+              {isMinimized ? <Maximize2 className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />}
+            </button>
+            <button
+              onClick={onToggle}
+              className="text-gray-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
         </div>
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={clearConversation}
-            className="text-gray-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10"
-            title="Clear conversation"
-          >
-            <MessageSquare className="h-4 w-4" />
-          </button>
-          <button
-            onClick={() => setIsMinimized(!isMinimized)}
-            className="text-gray-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10"
-          >
-            {isMinimized ? <Maximize2 className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />}
-          </button>
-          <button
-            onClick={onToggle}
-            className="text-gray-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-      </div>
 
-      {!isMinimized && (
-        <>
-          {/* Messages Container */}
-          <div className="flex-1 flex flex-col min-h-0">
-            {/* Error Display */}
-            {error && (
-              <div className="mx-4 mt-4 bg-red-600/20 border border-red-500/30 rounded-xl p-3 flex items-center space-x-2">
-                <AlertCircle className="h-4 w-4 text-red-400 flex-shrink-0" />
-                <p className="text-red-300 text-sm">{error}</p>
-              </div>
-            )}
+        {!isMinimized && (
+          <>
+            {/* Messages Container */}
+            <div className="flex-1 flex flex-col min-h-0">
+              {/* Error Display */}
+              {error && (
+                <div className="mx-4 mt-4 bg-red-600/20 border border-red-500/30 rounded-xl p-3 flex items-center space-x-2">
+                  <AlertCircle className="h-4 w-4 text-red-400 flex-shrink-0" />
+                  <p className="text-red-300 text-sm">{error}</p>
+                </div>
+              )}
 
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
+              {/* Messages */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                {messages.map((message) => (
                   <div
-                    className={`max-w-[85%] p-3 rounded-2xl ${
-                      message.role === 'user'
-                        ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white'
-                        : 'bg-black/30 backdrop-blur-sm border border-white/10 text-gray-100'
-                    }`}
+                    key={message.id}
+                    className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
-                    {message.role === 'assistant' && (
+                    <div
+                      className={`max-w-[85%] p-3 rounded-2xl ${
+                        message.role === 'user'
+                          ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white'
+                          : 'bg-black/30 backdrop-blur-sm border border-white/10 text-gray-100'
+                      }`}
+                    >
+                      {message.role === 'assistant' && (
+                        <div className="flex items-center space-x-2 mb-2">
+                          <Sparkles className="h-3 w-3 text-purple-400" />
+                          <span className="text-xs text-purple-400 font-semibold">
+                            AI Assistant {openaiService.isApiConfigured() ? '(ChatGPT)' : '(Demo)'}
+                          </span>
+                        </div>
+                      )}
+                      <p className="text-sm leading-relaxed whitespace-pre-line">{message.content}</p>
+                      <div className="text-xs opacity-60 mt-2">
+                        {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {isLoading && (
+                  <div className="flex justify-start">
+                    <div className="bg-black/30 backdrop-blur-sm border border-white/10 text-gray-100 p-3 rounded-2xl">
                       <div className="flex items-center space-x-2 mb-2">
                         <Sparkles className="h-3 w-3 text-purple-400" />
-                        <span className="text-xs text-purple-400 font-semibold">
-                          AI Assistant {openaiService.isApiConfigured() ? '(ChatGPT)' : '(Demo)'}
-                        </span>
+                        <span className="text-xs text-purple-400 font-semibold">AI Assistant</span>
                       </div>
-                    )}
-                    <p className="text-sm leading-relaxed whitespace-pre-line">{message.content}</p>
-                    <div className="text-xs opacity-60 mt-2">
-                      {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
+                        <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                        <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                )}
 
-              {isLoading && (
-                <div className="flex justify-start">
-                  <div className="bg-black/30 backdrop-blur-sm border border-white/10 text-gray-100 p-3 rounded-2xl">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <Sparkles className="h-3 w-3 text-purple-400" />
-                      <span className="text-xs text-purple-400 font-semibold">AI Assistant</span>
-                    </div>
-                    <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
-                      <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-                      <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
-                    </div>
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* Suggested Questions */}
+              {messages.length === 1 && (
+                <div className="px-4 pb-2 flex-shrink-0">
+                  <div className="text-xs text-gray-400 mb-2">Suggested questions:</div>
+                  <div className="space-y-1">
+                    {suggestedQuestions.slice(0, 2).map((question, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setInputValue(question)}
+                        className="w-full text-left bg-black/20 backdrop-blur-sm border border-white/10 rounded-lg p-2 text-xs text-gray-300 hover:bg-black/30 hover:text-white transition-all"
+                      >
+                        {question}
+                      </button>
+                    ))}
                   </div>
                 </div>
               )}
-
-              <div ref={messagesEndRef} />
             </div>
 
-            {/* Suggested Questions */}
-            {messages.length === 1 && (
-              <div className="px-4 pb-2 flex-shrink-0">
-                <div className="text-xs text-gray-400 mb-2">Suggested questions:</div>
-                <div className="space-y-1">
-                  {suggestedQuestions.slice(0, 2).map((question, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setInputValue(question)}
-                      className="w-full text-left bg-black/20 backdrop-blur-sm border border-white/10 rounded-lg p-2 text-xs text-gray-300 hover:bg-black/30 hover:text-white transition-all"
-                    >
-                      {question}
-                    </button>
-                  ))}
-                </div>
+            {/* Input Section */}
+            <div className="p-4 border-t border-white/10 flex-shrink-0">
+              <div className="flex space-x-2">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={inputValue}
+                  onChange={handleInputChange}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Ask me anything about learning..."
+                  className="flex-1 bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-sm"
+                  disabled={isLoading}
+                  autoComplete="off"
+                />
+                <button
+                  onClick={handleSendMessage}
+                  disabled={!inputValue.trim() || isLoading}
+                  className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-3 rounded-xl hover:shadow-lg hover:shadow-purple-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 disabled:transform-none flex-shrink-0"
+                >
+                  <Send className="h-4 w-4" />
+                </button>
               </div>
-            )}
-          </div>
+              <div className="text-xs text-gray-500 mt-2 text-center">
+                {openaiService.isApiConfigured() 
+                  ? 'AI Assistant powered by ChatGPT • Live responses • Video & Voice modes available'
+                  : 'AI Assistant • Demo mode with smart responses • Video & Voice modes available'
+                }
+              </div>
+            </div>
+          </>
+        )}
+      </div>
 
-          {/* Input Section */}
-          <div className="p-4 border-t border-white/10 flex-shrink-0">
-            <div className="flex space-x-2">
-              <input
-                ref={inputRef}
-                type="text"
-                value={inputValue}
-                onChange={handleInputChange}
-                onKeyDown={handleKeyDown}
-                placeholder="Ask me anything about learning..."
-                className="flex-1 bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-sm"
-                disabled={isLoading}
-                autoComplete="off"
-              />
-              <button
-                onClick={handleSendMessage}
-                disabled={!inputValue.trim() || isLoading}
-                className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-3 rounded-xl hover:shadow-lg hover:shadow-purple-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 disabled:transform-none flex-shrink-0"
-              >
-                <Send className="h-4 w-4" />
-              </button>
-            </div>
-            <div className="text-xs text-gray-500 mt-2 text-center">
-              {openaiService.isApiConfigured() 
-                ? 'AI Assistant powered by ChatGPT • Live responses'
-                : 'AI Assistant • Demo mode with smart responses'
-              }
-            </div>
-          </div>
-        </>
-      )}
-    </div>
+      {/* Video AI Assistant Modal */}
+      <VideoAIAssistant 
+        isOpen={showVideoAI} 
+        onClose={() => setShowVideoAI(false)} 
+      />
+
+      {/* Voice AI Assistant Modal */}
+      <VoiceAIAssistant 
+        isOpen={showVoiceAI} 
+        onClose={() => setShowVoiceAI(false)} 
+      />
+    </>
   );
 };
 
