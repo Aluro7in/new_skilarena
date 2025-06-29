@@ -5,10 +5,12 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Use default values for demo mode if environment variables are missing
 const DEMO_SUPABASE_URL = 'https://demo.supabase.co';
-const DEMO_SUPABASE_KEY = 'demo-mode-key';
+const DEMO_SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0';
 
 // Is the app using demo mode?
-export const isUsingDemoMode = true; // Force demo mode
+export const isUsingDemoMode = !supabaseUrl || !supabaseAnonKey || 
+                              supabaseUrl.includes('your_supabase') || 
+                              supabaseAnonKey.includes('your_supabase');
 export const supabase = createClient(
   supabaseUrl || DEMO_SUPABASE_URL, 
   supabaseAnonKey || DEMO_SUPABASE_KEY
@@ -88,26 +90,44 @@ export class SupabaseService {
 
   async getCurrentUser(): Promise<SupabaseUser | null> {
     try {
-      // Return a mock user in demo mode
-      return {
-        id: 'demo-user-id',
-        email: 'demo@example.com',
-        user_metadata: { 
-          full_name: 'Demo User',
-          avatar_url: 'https://images.pexels.com/photos/1722198/pexels-photo-1722198.jpeg?auto=compress&cs=tinysrgb&w=150'
+      if (isUsingDemoMode) {
+        // Return a mock user in demo mode
+        return {
+          id: 'demo-user-id',
+          email: 'demo@example.com',
+          user_metadata: { 
+            full_name: 'Demo User',
+            avatar_url: 'https://images.pexels.com/photos/1722198/pexels-photo-1722198.jpeg?auto=compress&cs=tinysrgb&w=150'
+          }
+        };
+      }
+      
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error) {
+        // Check if this is a session-related error (expected for unauthenticated users)
+        if (this.isSessionError(error.message)) {
+          console.debug('No authenticated user session found');
+        } else {
+          console.error('Get user error:', error);
         }
-      };
+        return null;
+      }
+      return user as SupabaseUser | null;
     } catch (error: any) {
       console.error('Get user error:', error);
-      // Still return a mock user even if there's an error
-      return {
-        id: 'demo-user-id',
-        email: 'demo@example.com',
-        user_metadata: { 
-          full_name: 'Demo User',
-          avatar_url: 'https://images.pexels.com/photos/1722198/pexels-photo-1722198.jpeg?auto=compress&cs=tinysrgb&w=150'
-        }
-      };
+      
+      // Only in demo mode should we return a mock user on error
+      if (isUsingDemoMode) {
+        return {
+          id: 'demo-user-id',
+          email: 'demo@example.com',
+          user_metadata: { 
+            full_name: 'Demo User',
+            avatar_url: 'https://images.pexels.com/photos/1722198/pexels-photo-1722198.jpeg?auto=compress&cs=tinysrgb&w=150'
+          }
+        };
+      }
+      return null;
     }
   }
 
