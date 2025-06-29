@@ -6,7 +6,8 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 // Check if the app should use demo mode
 export const isUsingDemoMode = !supabaseUrl || !supabaseAnonKey || 
                              supabaseUrl.includes('your_supabase') || 
-                             supabaseAnonKey.includes('your_supabase');
+                             supabaseAnonKey.includes('your_supabase') ||
+                             import.meta.env.VITE_FORCE_DEMO_MODE === 'true';
                              
 // Create Supabase client with actual credentials
 console.log("Initializing Supabase with:", { 
@@ -16,7 +17,7 @@ console.log("Initializing Supabase with:", {
 
 export const supabase = createClient(
   supabaseUrl || 'https://demo.supabase.co',
-  supabaseAnonKey || 'demo-anon-key'
+  supabaseAnonKey || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0'
 );
 
 export interface SupabaseUser {

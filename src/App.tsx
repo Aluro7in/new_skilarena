@@ -60,6 +60,7 @@ export default function App() {
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [showTroubleshooter, setShowTroubleshooter] = useState(false);
+  const forceDemoMode = import.meta.env.VITE_FORCE_DEMO_MODE === 'true';
 
   // Check for success page parameters
   const urlParams = new URLSearchParams(window.location.search);
@@ -70,7 +71,7 @@ export default function App() {
   // Demo mode activation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'F1' || (e.ctrlKey && e.key === 'd')) {
+      if ((e.key === 'F1' || (e.ctrlKey && e.key === 'd')) && !forceDemoMode) {
         e.preventDefault();
         setIsDemoMode(!isDemoMode);
       }
@@ -81,7 +82,14 @@ export default function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isDemoMode]);
+  }, [isDemoMode, forceDemoMode]);
+  
+  // Enable demo mode if forced in env
+  useEffect(() => {
+    if (forceDemoMode) {
+      setIsDemoMode(true);
+    }
+  }, [forceDemoMode]);
 
   useEffect(() => {
     // Check for existing session

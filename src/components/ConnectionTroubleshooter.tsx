@@ -126,7 +126,7 @@ const ConnectionTroubleshooter: React.FC = () => {
 
   if (isUsingDemoMode) {
     return (
-      <div className="bg-black/20 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
+      <div className="bg-black/20 backdrop-blur-xl border border-white/10 rounded-2xl p-6 space-y-6">
         <div className="text-center mb-6">
           <div className="w-16 h-16 bg-yellow-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
             <AlertTriangle className="h-8 w-8 text-yellow-400" />
@@ -145,9 +145,35 @@ const ConnectionTroubleshooter: React.FC = () => {
             </ul>
           </div>
         </div>
+        
+        <div className="bg-gray-800/50 rounded-xl p-6 mb-6">
+          <h3 className="text-lg font-bold text-white mb-4">Environment Settings</h3>
+          <div className="space-y-4 text-sm">
+            <div>
+              <p className="text-gray-400">Supabase URL:</p>
+              <p className="text-white font-mono overflow-hidden text-ellipsis">
+                {import.meta.env.VITE_SUPABASE_URL || 'Not configured'}
+              </p>
+            </div>
+            
+            <div>
+              <p className="text-gray-400">API Key Status:</p>
+              <p className="text-white">
+                {import.meta.env.VITE_SUPABASE_ANON_KEY 
+                  ? `Configured (${import.meta.env.VITE_SUPABASE_ANON_KEY.slice(0,5)}...${import.meta.env.VITE_SUPABASE_ANON_KEY.slice(-5)})` 
+                  : 'Not configured'}
+              </p>
+            </div>
+            
+            <div>
+              <p className="text-gray-400">Force Demo Mode:</p>
+              <p className="text-white">{import.meta.env.VITE_FORCE_DEMO_MODE === 'true' ? 'Enabled' : 'Disabled'}</p>
+            </div>
+          </div>
+        </div>
 
         <div className="text-center">
-          <h3 className="font-bold text-white mb-4">To connect to Supabase:</h3>
+          <h3 className="font-bold text-white mb-4">To Connect to Supabase:</h3>
           <ol className="text-gray-300 text-left max-w-lg mx-auto space-y-3 mb-6 list-decimal pl-5">
             <li>Create a <a href="https://supabase.com" target="_blank" rel="noreferrer" className="text-purple-400 hover:underline">Supabase account</a> if you don't have one</li>
             <li>Create a new Supabase project</li>

@@ -20,7 +20,7 @@ export class SubscriptionService {
       if (!user || supabaseService.isUsingDemoMode) {
         // Return a premium subscription for demo mode to showcase all features
         return {
-          tier: 'premium',
+          tier: import.meta.env.VITE_FORCE_DEMO_MODE === 'true' ? 'premium' : 'freemium',
           status: 'active',
           usage: {
             skillsThisMonth: 5,
@@ -63,7 +63,20 @@ export class SubscriptionService {
       return this.userSubscription;
     } catch (error) {
       console.error('Error fetching user subscription:', error);
-      return this.getDefaultSubscription();
+      // If there's an error fetching the subscription, return a premium subscription for demo purposes
+      return {
+        tier: 'premium',
+        status: 'active',
+        usage: {
+          skillsThisMonth: 5,
+          tutorialsThisMonth: 3,
+          gameTestingThisMonth: 2,
+          challengesThisWeek: 1,
+          aiQuestionsToday: 10,
+          certificatesThisYear: 2,
+          storageUsedGB: 1.5,
+        },
+      };
     }
   }
 
