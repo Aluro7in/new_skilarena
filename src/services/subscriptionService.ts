@@ -17,7 +17,7 @@ export class SubscriptionService {
   async getCurrentUserSubscription(): Promise<UserSubscriptionData> {
     try {
       const user = await supabaseService.getCurrentUser();
-      if (!user) {
+      if (!user || supabaseService.isUsingDemoMode) {
         return this.getDefaultSubscription();
       }
 
@@ -81,6 +81,7 @@ export class SubscriptionService {
   }
 
   async checkFeatureAccess(feature: string): Promise<{ hasAccess: boolean; reason?: string }> {
+    try {
     const subscription = await this.getCurrentUserSubscription();
     const hasAccess = canAccessFeature(subscription.tier, feature as any);
     
@@ -93,9 +94,14 @@ export class SubscriptionService {
     }
     
     return { hasAccess: true };
+    } catch (error) {
+      console.warn('Failed to check feature access, allowing by default', error);
+      return { hasAccess: true };
+    }
   }
 
   async checkUsageLimit(limitType: string, currentUsage?: number): Promise<{ withinLimit: boolean; remaining: number; limit: number }> {
+    try {
     const subscription = await this.getCurrentUserSubscription();
     const usage = currentUsage ?? subscription.usage[limitType as keyof typeof subscription.usage] ?? 0;
     const withinLimit = isWithinLimits(subscription.tier, limitType as any, usage);
@@ -107,8 +113,16 @@ export class SubscriptionService {
     return {
       withinLimit,
       remaining,
-      limit: limit === -1 ? Infinity : limit,
+      limit: limit === -1 ? Infinity : limit
     };
+    } catch (error) {
+      console.warn('Failed to check usage limit, allowing unlimited usage', error);
+      return {
+        withinLimit: true,
+        remaining: Infinity,
+        limit: Infinity
+      };
+    }
   }
 
   async incrementUsage(limitType: string, amount: number = 1): Promise<boolean> {

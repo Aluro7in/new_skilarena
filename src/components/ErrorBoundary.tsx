@@ -22,6 +22,15 @@ class ErrorBoundary extends Component<Props, State> {
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('Uncaught error:', error, errorInfo);
+    
+    // Special handling for network errors
+    if (error.message.includes('Failed to fetch') || error.message.includes('Network') || 
+        !navigator.onLine) {
+      this.setState({
+        hasError: true,
+        error: new Error('Network connection issue. Please check your internet connection and try again.')
+      });
+    }
   }
 
   private handleRetry = () => {
@@ -40,7 +49,7 @@ class ErrorBoundary extends Component<Props, State> {
       return (
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
           <div className="bg-black/20 backdrop-blur-xl border border-white/10 rounded-3xl p-8 max-w-md w-full text-center">
-            <div className="w-16 h-16 bg-red-600/20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className="w-16 h-16 bg-red-600/20 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
               <AlertCircle className="w-8 h-8 text-red-400" />
             </div>
             
@@ -52,9 +61,14 @@ class ErrorBoundary extends Component<Props, State> {
             
             {this.state.error && (
               <div className="bg-red-600/10 border border-red-500/20 rounded-xl p-4 mb-6 text-left">
-                <p className="text-red-300 text-sm font-mono whitespace-pre-wrap">
+                <p className="text-red-300 text-sm whitespace-pre-wrap">
                   {this.state.error.name}: {this.state.error.message}
                 </p>
+                {(this.state.error.message.includes('fetch') || !navigator.onLine) && (
+                  <div className="mt-2 text-yellow-300 text-sm">
+                    It looks like you might be offline or having connection issues. Please check your internet connection.
+                  </div>
+                )}
                 <p className="text-gray-400 text-xs mt-2">
                   This error has been logged. If the problem persists, please try refreshing the page or contact support.
                 </p>

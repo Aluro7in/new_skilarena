@@ -55,6 +55,12 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ isOpen, onToggle }) => {
   const handleSendMessage = async () => {
     if (!inputValue.trim() || isLoading) return;
 
+    // Check if app is online before attempting API call
+    if (!navigator.onLine) {
+      setError('You appear to be offline. Please check your internet connection and try again.');
+      return;
+    }
+
     const userMessage: Message = {
       id: Date.now().toString(),
       content: inputValue,
@@ -70,7 +76,8 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ isOpen, onToggle }) => {
 
     try {
       // Convert messages to OpenAI format
-      const conversationHistory: AIMessage[] = [...messages, userMessage].map(msg => ({
+      const messagesToSend = [...messages, userMessage].slice(-10); // Only send last 10 messages to avoid token limits
+      const conversationHistory: AIMessage[] = messagesToSend.map(msg => ({
         role: msg.role,
         content: msg.content
       }));

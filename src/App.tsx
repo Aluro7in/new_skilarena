@@ -90,7 +90,14 @@ export default function App() {
         if (currentUser) {
           let subscription;
           try {
-            subscription = await subscriptionService.getCurrentUserSubscription();
+            // Add a timeout for subscription fetch to prevent long waits
+            const timeoutPromise = new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('Subscription fetch timed out')), 5000)
+            );
+            subscription = await Promise.race([
+              subscriptionService.getCurrentUserSubscription(),
+              timeoutPromise
+            ]);
           } catch (subscriptionError) {
             console.warn('Unable to fetch subscription, using default', subscriptionError);
           }
@@ -132,6 +139,8 @@ export default function App() {
   }, []);
 
   const handleLogin = (userData: User) => {
+    // Clear any previous errors
+    setError(null);
     setUser(userData);
   };
 

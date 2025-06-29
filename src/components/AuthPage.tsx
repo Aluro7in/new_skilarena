@@ -144,7 +144,12 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
       }
     } catch (err: any) {
       console.error('Auth error:', err);
-      setError(err.message || 'An unexpected error occurred. Please try again.');
+      // Provide more user-friendly error messages
+      if (err.message?.includes('fetch') || !navigator.onLine) {
+        setError('Network connection error. Please check your internet connection and try again.');
+      } else {
+        setError(err.message || 'An unexpected error occurred. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -376,6 +381,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
                       value={formData.email}
                       onChange={handleInputChange}
                       className="w-full bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl pl-10 pr-4 py-4 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
+                      autoComplete="email"
                       required
                     />
                   </div>
@@ -389,6 +395,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
                       value={formData.password}
                       onChange={handleInputChange}
                       className="w-full bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl pl-10 pr-12 py-4 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
+                      autoComplete={isLogin ? "current-password" : "new-password"}
                       required
                     />
                     <button
