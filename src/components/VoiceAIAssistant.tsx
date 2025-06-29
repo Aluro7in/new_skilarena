@@ -262,14 +262,14 @@ const VoiceAIAssistant: React.FC<VoiceAIAssistantProps> = ({ isOpen, onClose }) 
             
             {hasPermission && (
               <>
-                {openaiService.isApiConfigured() && (
-                  <div className="mt-4 text-center">
+                <div className="mt-4 text-center">
+                  {openaiService.isApiConfigured() && (
                     <span className="inline-flex items-center bg-green-600/20 text-green-300 text-xs px-2 py-1 rounded-full">
                       <CheckCircle className="h-3 w-3 mr-1" />
                       OpenAI API Connected
                     </span>
-                  </div>
-                )}
+                  )}
+                </div>
                 
                 <div className="mt-2 flex justify-center items-center space-x-2">
                   <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>

@@ -32,7 +32,10 @@ export class ElevenLabsService {
 
   constructor() {
     const apiKey = import.meta.env.VITE_ELEVENLABS_API_KEY;
-    this.isConfigured = !!apiKey && apiKey !== 'your_elevenlabs_api_key' && !apiKey.includes('sk_');
+    this.isConfigured = !!apiKey && 
+                        !apiKey.includes('your_elevenlabs_api_key') && 
+                        !apiKey.includes('sk-') &&
+                        apiKey.length > 10;
     
     this.config = {
       apiKey: apiKey || '',
