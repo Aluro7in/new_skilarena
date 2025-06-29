@@ -7,9 +7,17 @@ interface NavigationProps {
   user: { name: string; email: string };
   onAIToggle: () => void;
   showTroubleshooter: () => void;
+  hasConnectionIssues?: boolean;
 }
 
-const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange, user, onAIToggle, showTroubleshooter }) => {
+const Navigation: React.FC<NavigationProps> = ({ 
+  activeTab, 
+  onTabChange, 
+  user, 
+  onAIToggle, 
+  showTroubleshooter,
+  hasConnectionIssues = false
+}) => {
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     { id: 'skills', label: 'Skills', icon: BookOpen },
@@ -23,9 +31,6 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange, user, o
     { id: 'leaderboard', label: 'Leaderboard', icon: Trophy },
     { id: 'team-management', label: 'Team', icon: Settings },
   ];
-
-  // Check if we're online and Supabase is configured
-  const hasConnectionIssues = !navigator.onLine || !import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL.includes('your_');
 
   return (
     <nav className="bg-black/20 backdrop-blur-xl border-b border-white/10 sticky top-0 z-50">
@@ -95,7 +100,7 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange, user, o
               }`}
             >
               <Crown className="h-4 w-4" />
-              <span className="hidden sm:block">Upgrade</span>
+              <span className="hidden sm:block">Demo Premium</span>
               {/* Pulsing indicator */}
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-300 rounded-full animate-pulse"></div>
               {/* Glow effect */}

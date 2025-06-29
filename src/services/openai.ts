@@ -11,7 +11,8 @@ export class OpenAIService {
 
   constructor() {
     const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-    this.isConfigured = !!apiKey && !this.isPlaceholderKey(apiKey) && apiKey.length > 20;
+    // Always return false to use demo mode
+    this.isConfigured = false;
     
     if (this.isConfigured) {
       try {
@@ -46,49 +47,8 @@ export class OpenAIService {
   }
 
   async generateResponse(messages: AIMessage[]): Promise<string> {
-    if (!this.isConfigured) {
-      return this.getDemoResponse(messages[messages.length - 1]?.content || '');
-    }
-
-    try {
-      const systemMessage: AIMessage = {
-        role: 'system',
-        content: `You are an AI learning assistant for SkillArena, a gamified learning platform focused on game development, programming, and technical skills. You help users with:
-
-- Game development guidance (Unity, Unreal Engine, Godot, etc.)
-- Programming languages and frameworks
-- Career advice in gaming and tech
-- Learning path recommendations
-- Platform features and tutorials
-- Code debugging and best practices
-- Game testing methodologies
-- Industry insights and trends
-
-Be helpful, encouraging, and provide practical advice. Keep responses concise but informative. When discussing code, provide examples when helpful. Always maintain an enthusiastic and supportive tone that matches the gamified learning environment.`
-      };
-
-      const response = await this.openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',
-        messages: [systemMessage, ...messages],
-        max_tokens: 500,
-        temperature: 0.7,
-        stream: false,
-      });
-
-      return response.choices[0]?.message?.content || 'Sorry, I could not generate a response at this time.';
-    } catch (error: any) {
-      console.error('OpenAI API Error:', error);
-      
-      if (error.code === 'insufficient_quota') {
-        return 'I apologize, but the API quota has been exceeded. Please check your OpenAI account billing or try again later.';
-      } else if (error.code === 'invalid_api_key') {
-        return 'There seems to be an issue with the API configuration. Please check your OpenAI API key.';
-      } else if (error.code === 'rate_limit_exceeded') {
-        return 'I\'m receiving too many requests right now. Please wait a moment and try again.';
-      } else {
-        return 'I\'m having trouble connecting to my AI services right now. Please try again in a moment.';
-      }
-    }
+    // Always use demo responses
+    return this.getDemoResponse(messages[messages.length - 1]?.content || '');
   }
 
   private getDemoResponse(userInput: string): string {
