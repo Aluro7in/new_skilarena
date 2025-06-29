@@ -3,16 +3,19 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Is the app using demo mode?
+// Check if the app should use demo mode
 export const isUsingDemoMode = !supabaseUrl || !supabaseAnonKey || 
-                             supabaseUrl.includes('your_') || 
-                             supabaseAnonKey.includes('your_') ||
-                             !supabaseUrl.startsWith('https://') ||
-                             supabaseAnonKey.length < 10;
+                             supabaseUrl.includes('your_supabase') || 
+                             supabaseAnonKey.includes('your_supabase');
                              
-// Use actual credentials if available, otherwise use defaults for demo mode
+// Create Supabase client with actual credentials
+console.log("Initializing Supabase with:", { 
+  url: supabaseUrl, 
+  usingDemoMode: isUsingDemoMode 
+});
+
 export const supabase = createClient(
-  supabaseUrl || 'https://demo.supabase.co', 
+  supabaseUrl || 'https://demo.supabase.co',
   supabaseAnonKey || 'demo-anon-key'
 );
 
@@ -41,7 +44,7 @@ export interface UserSubscription {
 export class SupabaseService {
   async signUp(email: string, password: string, fullName?: string) {
     try {
-      // Always return mock data since we're in demo mode
+      if (isUsingDemoMode) {
         // Return mock data in demo mode to prevent actual API calls
         return {
           user: {
@@ -51,6 +54,24 @@ export class SupabaseService {
             email_confirmed_at: new Date().toISOString()
           }
         };
+      }
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+          },
+        },
+      });
+
+      if (error) {
+        console.error('Signup error:', error);
+        throw new Error(this.getReadableErrorMessage(error.message));
+      }
+      
+      return data;
     } catch (error: any) {
       console.error('Signup error:', error);
       throw error;
@@ -59,7 +80,7 @@ export class SupabaseService {
 
   async signIn(email: string, password: string) {
     try {
-      // Always return mock data since we're in demo mode
+      if (isUsingDemoMode) {
         // Return mock data in demo mode to prevent actual API calls
         return {
           user: {
@@ -69,6 +90,19 @@ export class SupabaseService {
             email_confirmed_at: new Date().toISOString()
           }
         };
+      }
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        console.error('Signin error:', error);
+        throw new Error(this.getReadableErrorMessage(error.message));
+      }
+
+      return data;
     } catch (error: any) {
       console.error('Signin error:', error);
       throw error;

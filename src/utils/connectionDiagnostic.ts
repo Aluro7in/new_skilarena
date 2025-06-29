@@ -31,6 +31,11 @@ export async function runConnectionDiagnostic(): Promise<DiagnosticReport> {
   // 1. Check Supabase URL validity
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
   const supabaseUrlResult = checkSupabaseUrl(supabaseUrl);
+  
+  // Log diagnostic info
+  console.log("Running Supabase connection diagnostic with URL:", 
+    supabaseUrl ? `${supabaseUrl.substring(0, 15)}...` : 'undefined');
+  
   report.supabaseUrl = supabaseUrlResult;
   if (supabaseUrlResult.status !== 'success') {
     recommendations.push(supabaseUrlResult.suggestion || 'Verify your Supabase URL in the .env file');
@@ -119,7 +124,7 @@ function checkSupabaseUrl(url?: string): DiagnosticResult {
   if (!url) {
     return {
       status: 'error',
-      message: 'Supabase URL is missing',
+      message: 'Supabase URL is not defined',
       details: 'VITE_SUPABASE_URL environment variable is not defined',
       suggestion: 'Add VITE_SUPABASE_URL to your .env file'
     };
@@ -163,7 +168,7 @@ function checkSupabaseKey(key?: string): DiagnosticResult {
   if (!key) {
     return {
       status: 'error',
-      message: 'Supabase anon key is missing',
+      message: 'Supabase anonymous key is not defined',
       details: 'VITE_SUPABASE_ANON_KEY environment variable is not defined',
       suggestion: 'Add VITE_SUPABASE_ANON_KEY to your .env file'
     };
